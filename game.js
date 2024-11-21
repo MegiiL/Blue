@@ -135,4 +135,3 @@ calculateCanvasSize();
 
 // Add an event listener to recalculate canvas size when the window is resized
 window.addEventListener("resize", calculateCanvasSize);
-
