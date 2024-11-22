@@ -5,7 +5,8 @@ class Pacman{
         this.width = width;
         this.height = height;
         this.speed = speed;
-        this.direction = 4;
+        this.direction = DIRECTION_RIGHT;
+        this.nextDirection = this.direction;
         this.currentFrame = 1;
         this.frameCount = 7;
 
@@ -78,7 +79,20 @@ class Pacman{
 
     checkGhostCollision(){  }
 
-    changeDirectionIfPossible(){  }
+    changeDirectionIfPossible(){ 
+        if(this.direction == this.nextDirection) return;
+
+        let tempDirection = this.direction;
+        this.direction = this.nextDirection;
+        this.moveForwards();
+        if(this.checkCollision()){
+            this.moveBackwards();
+            this.direction = tempDirection;
+        }else{
+            this.moveBackwards();
+        }
+
+     }
 
     changeAnimation(){
         this.currentFrame = this.currentFrame == this.frameCount ? 1 : this.currentFrame + 1;
