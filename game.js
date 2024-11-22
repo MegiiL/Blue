@@ -189,10 +189,7 @@ window.addEventListener("resize", calculateCanvasSize);
      
     }, 1)
   } )
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartedOnPacman = false;
-
+// Adjust the touch event listener to immediately change direction
 canvas.addEventListener("touchstart", (event) => {
     const touch = event.touches[0];
     const rect = canvas.getBoundingClientRect();
@@ -202,7 +199,6 @@ canvas.addEventListener("touchstart", (event) => {
     touchStartX = touchX;
     touchStartY = touchY;
 
-    // Check if the touch starts within Pac-Man's circular area
     const dx = touchX - (pacman.x + pacman.width / 2);
     const dy = touchY - (pacman.y + pacman.height / 2);
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -226,7 +222,7 @@ canvas.addEventListener("touchend", (event) => {
     const deltaY = touchEndY - touchStartY;
     const SWIPE_THRESHOLD = 20;
 
-    // Determine swipe direction
+    // Determine swipe direction and change direction immediately
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
         pacman.nextDirection = deltaX > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT;
     } else if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
