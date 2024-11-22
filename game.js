@@ -192,14 +192,33 @@ window.addEventListener("resize", calculateCanvasSize);
 
 let touchStartX = 0;
 let touchStartY = 0;
+let touchStartedOnPacman = false; // Flag to track if touch started on Pac-Man
 
 canvas.addEventListener("touchstart", (event) => {
     const touch = event.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
+
+    // Check if touch is within Pac-Man's area
+    const pacmanLeft = pacman.x;
+    const pacmanRight = pacman.x + pacman.width;
+    const pacmanTop = pacman.y;
+    const pacmanBottom = pacman.y + pacman.height;
+
+    if (
+        touchStartX >= pacmanLeft &&
+        touchStartX <= pacmanRight &&
+        touchStartY >= pacmanTop &&
+        touchStartY <= pacmanBottom
+    ) {
+        touchStartedOnPacman = true; // Set flag to true
+    }
 });
 
 canvas.addEventListener("touchend", (event) => {
+    if (!touchStartedOnPacman) return; // Only process swipe if it started on Pac-Man
+
+    touchStartedOnPacman = false; // Reset flag
     const touch = event.changedTouches[0];
     const touchEndX = touch.clientX;
     const touchEndY = touch.clientY;
@@ -226,4 +245,3 @@ canvas.addEventListener("touchend", (event) => {
         }
     }
 });
-
