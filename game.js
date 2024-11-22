@@ -189,59 +189,49 @@ window.addEventListener("resize", calculateCanvasSize);
      
     }, 1)
   } )
-
 let touchStartX = 0;
 let touchStartY = 0;
-let touchStartedOnPacman = false; // Flag to track if touch started on Pac-Man
+let touchStartedOnPacman = false;
 
 canvas.addEventListener("touchstart", (event) => {
     const touch = event.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
+    const rect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
 
-    // Check if touch is within Pac-Man's area
-    const pacmanLeft = pacman.x;
-    const pacmanRight = pacman.x + pacman.width;
-    const pacmanTop = pacman.y;
-    const pacmanBottom = pacman.y + pacman.height;
+    touchStartX = touchX;
+    touchStartY = touchY;
 
-    if (
-        touchStartX >= pacmanLeft &&
-        touchStartX <= pacmanRight &&
-        touchStartY >= pacmanTop &&
-        touchStartY <= pacmanBottom
-    ) {
-        touchStartedOnPacman = true; // Set flag to true
+    // Check if the touch starts within Pac-Man's circular area
+    const dx = touchX - (pacman.x + pacman.width / 2);
+    const dy = touchY - (pacman.y + pacman.height / 2);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= pacman.width / 2) {
+        touchStartedOnPacman = true;
+        console.log("Touch started on Pac-Man");
     }
 });
 
 canvas.addEventListener("touchend", (event) => {
-    if (!touchStartedOnPacman) return; // Only process swipe if it started on Pac-Man
+    if (!touchStartedOnPacman) return; // Ignore if touch didn't start on Pac-Man
+    touchStartedOnPacman = false;
 
-    touchStartedOnPacman = false; // Reset flag
     const touch = event.changedTouches[0];
-    const touchEndX = touch.clientX;
-    const touchEndY = touch.clientY;
+    const rect = canvas.getBoundingClientRect();
+    const touchEndX = touch.clientX - rect.left;
+    const touchEndY = touch.clientY - rect.top;
 
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
+    const SWIPE_THRESHOLD = 20;
 
     // Determine swipe direction
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 0) {
-            // Swipe Right
-            pacman.nextDirection = DIRECTION_RIGHT;
-        } else {
-            // Swipe Left
-            pacman.nextDirection = DIRECTION_LEFT;
-        }
-    } else {
-        if (deltaY > 0) {
-            // Swipe Down
-            pacman.nextDirection = DIRECTION_BOTTOM;
-        } else {
-            // Swipe Up
-            pacman.nextDirection = DIRECTION_UP;
-        }
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        pacman.nextDirection = deltaX > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT;
+    } else if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        pacman.nextDirection = deltaY > 0 ? DIRECTION_BOTTOM : DIRECTION_UP;
     }
+
+    console.log(`Swipe detected: ${pacman.nextDirection}`);
 });
