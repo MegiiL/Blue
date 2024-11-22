@@ -189,3 +189,41 @@ window.addEventListener("resize", calculateCanvasSize);
      
     }, 1)
   } )
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener("touchstart", (event) => {
+    const touch = event.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+});
+
+canvas.addEventListener("touchend", (event) => {
+    const touch = event.changedTouches[0];
+    const touchEndX = touch.clientX;
+    const touchEndY = touch.clientY;
+
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // Determine swipe direction
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 0) {
+            // Swipe Right
+            pacman.nextDirection = DIRECTION_RIGHT;
+        } else {
+            // Swipe Left
+            pacman.nextDirection = DIRECTION_LEFT;
+        }
+    } else {
+        if (deltaY > 0) {
+            // Swipe Down
+            pacman.nextDirection = DIRECTION_BOTTOM;
+        } else {
+            // Swipe Up
+            pacman.nextDirection = DIRECTION_UP;
+        }
+    }
+});
+
