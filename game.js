@@ -1,6 +1,6 @@
 const canvas = document.getElementById("canvas");
 const canvasContext = canvas.getContext("2d");
-const pacmanFrames = document.getElementById("animation");
+const pacmanFrames = document.getElementById("animations");
 const ghostFrames = document.getElementById("ghosts");
 
 // Global variables to store canvas dimensions and block size
@@ -18,6 +18,13 @@ let createRect = (x, y, width, height, color) => {
     canvasContext.fillStyle = color;
     canvasContext.fillRect(x, y, width, height);
 };
+
+
+const DIRECTION_RIGHT = 4;
+const DIRECTION_UP = 3;
+const DIRECTION_LEFT = 2;
+const DIRECTION_BOTTOM = 1;
+
 
 // if 1- wall, if 0 not wall
 // Map definition (20 columns × 22 rows)
@@ -53,12 +60,17 @@ let gameLoop = () => {
 
 let update = () => {
     //todo 
+
+   pacman.moveProcess();
+
 }; 
 
 let draw = () => {
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     createRect(0, 0, canvas.width, canvas.height, "black"); 
     drawWalls();
+
+    pacman.draw();
 };
 
 let gameInterval = setInterval(gameLoop, 1000 / fps);
@@ -108,6 +120,20 @@ let drawWalls = () => {
         }
     }
 };
+
+let createNewPacman = () => {
+    pacman = new Pacman(
+      oneBlockSize,
+      oneBlockSize,
+      oneBlockSize,
+      oneBlockSize,
+      oneBlockSize / 5
+  
+     );
+  };
+  
+
+
 // Function to calculate canvas size
 let calculateCanvasSize = () => {
     const screenWidth = window.innerWidth;
@@ -133,5 +159,11 @@ let calculateCanvasSize = () => {
 // Initialize the canvas size on load
 calculateCanvasSize();
 
+
+
 // Add an event listener to recalculate canvas size when the window is resized
 window.addEventListener("resize", calculateCanvasSize);
+
+
+  createNewPacman();
+  gameLoop(); 
