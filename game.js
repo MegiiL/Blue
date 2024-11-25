@@ -13,6 +13,8 @@ let fps = 30;
 let wallSpaceWidth;
 let wallOffset;
 let wallInnerColor = "black";
+let foodColor = "#ffff4d";
+let score = 0;
 
 let createRect = (x, y, width, height, color) => {
     canvasContext.fillStyle = color;
@@ -36,14 +38,14 @@ let map = [
     [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-    [1, 0, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 0, 1],
+    [1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
+    [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
@@ -59,18 +61,45 @@ let gameLoop = () => {
 };
 
 let update = () => {
-    //todo 
-
    pacman.moveProcess();
+   pacman.eat();
 
 }; 
+
+let drawFoods = () => {
+    for(let i =0; i < map.length; i++){
+        for(let j = 0; j < map[0].length; j++){
+           if(map[i][j] == 2){
+            createRect(j * oneBlockSize + oneBlockSize / 3,
+                i * oneBlockSize + oneBlockSize / 3,
+                oneBlockSize / 3,
+                oneBlockSize / 3,
+                foodColor
+             );
+           }
+        }
+    }
+}
+
+let drawScore = () => {
+
+canvasContext.fillStyle="white";
+if (canvas.width <= 400) {
+    canvasContext.font = "16px Courier"; // Smaller font for screens up to 400px
+} else if (canvas.width <= 600) {
+    canvasContext.font = "18px Courier"; // Medium font for screens between 401px and 600px
+}
+
+canvasContext.fillText("Score: " + score, 30 , oneBlockSize/2 + 3.5); // position of score at top left of the screen
+}
 
 let draw = () => {
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     createRect(0, 0, canvas.width, canvas.height, "black"); 
     drawWalls();
-
+    drawFoods();
     pacman.draw();
+    drawScore();
 };
 
 let gameInterval = setInterval(gameLoop, 1000 / fps);
@@ -189,45 +218,3 @@ window.addEventListener("resize", calculateCanvasSize);
      
     }, 1)
   } )
-// Adjust the touch event listener to immediately change direction
-canvas.addEventListener("touchstart", (event) => {
-    const touch = event.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - rect.left;
-    const touchY = touch.clientY - rect.top;
-
-    touchStartX = touchX;
-    touchStartY = touchY;
-
-    const dx = touchX - (pacman.x + pacman.width / 2);
-    const dy = touchY - (pacman.y + pacman.height / 2);
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance <= pacman.width / 2) {
-        touchStartedOnPacman = true;
-        console.log("Touch started on Pac-Man");
-    }
-});
-
-canvas.addEventListener("touchend", (event) => {
-    if (!touchStartedOnPacman) return; // Ignore if touch didn't start on Pac-Man
-    touchStartedOnPacman = false;
-
-    const touch = event.changedTouches[0];
-    const rect = canvas.getBoundingClientRect();
-    const touchEndX = touch.clientX - rect.left;
-    const touchEndY = touch.clientY - rect.top;
-
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
-    const SWIPE_THRESHOLD = 20;
-
-    // Determine swipe direction and change direction immediately
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        pacman.nextDirection = deltaX > 0 ? DIRECTION_RIGHT : DIRECTION_LEFT;
-    } else if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-        pacman.nextDirection = deltaY > 0 ? DIRECTION_BOTTOM : DIRECTION_UP;
-    }
-
-    console.log(`Swipe detected: ${pacman.nextDirection}`);
-});
