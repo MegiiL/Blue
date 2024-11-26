@@ -114,8 +114,6 @@ class Ghost{
             this.direction = tempDirection;
             return;
         }
-
-        
         
         this.moveForwards();
         if(this.checkCollision()){
