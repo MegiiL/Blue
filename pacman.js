@@ -45,12 +45,19 @@ class Pacman{
             for(let j = 0; j < map[0].length; j++){
                 if(map[i][j] == 4 && this.getMapX() == j && this.getMapY() == i){
                     map[i][j] = 3;
-                    score+=10;
+                    score += 10;
+    
+                    // Activate ghost override
+                    ghostOverrideActive = true;
+                    clearTimeout(ghostOverrideTimer); // Clear any previous timers to avoid stacking
+                    ghostOverrideTimer = setTimeout(() => {
+                        ghostOverrideActive = false; // Reset after 8 seconds
+                    }, 8000);
                 }
             }
         }
-
     }
+    
 
 
     //moving backwards
