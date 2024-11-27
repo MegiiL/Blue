@@ -3,6 +3,7 @@ const canvasContext = canvas.getContext("2d");
 const pacmanFrames = document.getElementById("animations"); //7 pacman frames to look like he is biting
 const ghostFrames = document.getElementById("ghosts"); // 4 ghosts
 
+
 // Global variables to store canvas dimensions and block size
 let canvasWidth, canvasHeight, oneBlockSize;
 // Maximum canvas width constraint
@@ -109,21 +110,31 @@ let update = () => {
     pacman.moveProcess();
     pacman.eat();
     pacman.eatPowerUp();
-    for(let i = 0; i < ghosts.length; i++){
-     ghosts[i].moveProcess();
+
+    ghosts.forEach(ghost => ghost.moveProcess());
+
+    // Handle collision logic
+    if (pacman.checkGhostCollision(ghosts)) {
+        if (ghostOverrideActive) {
+            ghosts.forEach(ghost => {
+                if (pacman.getMapX() === ghost.getMapX() && pacman.getMapY() === ghost.getMapY()) {
+                    // Draw the ghost at its initial position
+                    ghost.x = ghost.initialX;
+                    ghost.y = ghost.initialY;
+                }
+            });
+        } else {
+            restartGame();
+        }
     }
- 
-    if(pacman.checkGhostCollision(ghosts)){ //if pacman and ghosts collide restart the game
-     restartGame();
+
+    // Check for win condition
+    if (score >= (foodCount + 10 * powerUpCount)) { 
+        drawWin();
+        clearInterval(gameInterval);
     }
- 
-    if(score >= (foodCount + 10 * powerUpCount)){ // user needs 270 points to win (230 food times 1 points each + 4 power-ups times 10 points each)
-     drawWin();
-     clearInterval(gameInterval);
-    }
- 
-    
- }; 
+};
+
  
 //when pacman and ghosts collide they are drawn to the initial positions
 // user loses one live/heart
