@@ -22,6 +22,10 @@ let lives = 3; // 3 tries for user within the game
 let foodCount = 0; //useful to calculate total winning score
 let powerUpCount = 0; //userful to calculate total winning score
 
+let ghostOverrideActive = false;
+let ghostOverrideTimer = null;
+
+
 
 // wall, food 
 let createRect = (x, y, width, height, color) => {
