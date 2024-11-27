@@ -1,36 +1,41 @@
 const canvas = document.getElementById("canvas");
 const canvasContext = canvas.getContext("2d");
-const pacmanFrames = document.getElementById("animations");
-const ghostFrames = document.getElementById("ghosts");
+const pacmanFrames = document.getElementById("animations"); //7 pacman frames to look like he is biting
+const ghostFrames = document.getElementById("ghosts"); // 4 ghosts
 
 // Global variables to store canvas dimensions and block size
 let canvasWidth, canvasHeight, oneBlockSize;
 // Maximum canvas width constraint
 const maxCanvasWidth = 600;
-
-let wallColor = "#342DCA";
-let fps = 30;
 let wallSpaceWidth;
 let wallOffset;
-let wallInnerColor = "black";
-let foodColor = "#ffff4d";
-let score = 0;
-let ghosts = [];
-let ghostCount = 4;
-let lives = 3;
-let foodCount = 0;
 
+let wallColor = "#342DCA"; // blue wall
+let fps = 30; //number of frames to draw per second
+let wallInnerColor = "black"; //making blocks black in the middle
+let foodColor = "#ffff4d"; // yellow food
+let score = 0;  //user score
+let ghosts = []; //ghosts array
+let randomTargetsForGhosts = []; // random targets for ghosts array
+let ghostCount = 4; 
+let lives = 3; // 3 tries for user within the game
+let foodCount = 0; //useful to calculate total winning score
+let powerUpCount = 0; //userful to calculate total winning score
+
+
+// wall, food 
 let createRect = (x, y, width, height, color) => {
     canvasContext.fillStyle = color;
     canvasContext.fillRect(x, y, width, height);
 };
 
-
+//moving directions
 const DIRECTION_RIGHT = 4;
 const DIRECTION_UP = 3;
 const DIRECTION_LEFT = 2;
 const DIRECTION_BOTTOM = 1;
 
+//ghosts positions on the png image
 let ghostImageLocations = [
     {x: 0, y: 0},
     {x: 176, y:0},
@@ -38,11 +43,14 @@ let ghostImageLocations = [
     {x: 176, y:121},
 ]
 
-// if 1- wall, if 0 not wall
+// if 1- wall
+// if 2- food = 230 total
+// if 4- cherry power-up = 4 total
+// when pacman eats food/power-up tile = 3, empty tile
 // Map definition (20 columns × 22 rows)
 let map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
@@ -52,7 +60,7 @@ let map = [
     [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1],
-    [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 2, 1, 2, 1, 4, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
     [1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
     [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 1],
@@ -61,11 +69,13 @@ let map = [
     [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
     [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
     [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
-for(let i =0; i < map.length; i++){
+// Count how many foods to calculate total winning score, one food is worth one point
+//if tile = 2 it is food
+for(let i =0; i < map.length; i++){        
     for(let j = 0; j < map[0].length; j++){
        if(map[i][j] == 2){
          foodCount++;
@@ -73,40 +83,47 @@ for(let i =0; i < map.length; i++){
     }
 }
 
-let randomTargetsForGhosts = [
-    {x: 1 * oneBlockSize, y: 1 * oneBlockSize},
-    {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-    {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
-    {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
+// Count how many power-ups to calculate total winning score, one power-up is worth ten points
+//if tile = 4 it is power-up
+for(let i =0; i < map.length; i++){
+    for(let j = 0; j < map[0].length; j++){
+       if(map[i][j] == 4){
+         powerUpCount++;
+       }
+    }
+}
 
-];
-
+//gameloop to draw and update the elements
 let gameLoop = () => {
     draw();
     update();
 };
 
 
-
+//game logic
 let update = () => {
-   pacman.moveProcess();
-   pacman.eat();
-   for(let i = 0; i < ghosts.length; i++){
-    ghosts[i].moveProcess();
-   }
-
-   if(pacman.checkGhostCollision(ghosts)){
-    restartGame();
-   }
-
-   if(score >= foodCount){
-    drawWin();
-    clearInterval(gameInterval);
-   }
-
-   
-}; 
-
+    pacman.moveProcess();
+    pacman.eat();
+    pacman.eatPowerUp();
+    for(let i = 0; i < ghosts.length; i++){
+     ghosts[i].moveProcess();
+    }
+ 
+    if(pacman.checkGhostCollision(ghosts)){ //if pacman and ghosts collide restart the game
+     restartGame();
+    }
+ 
+    if(score >= (foodCount + 10 * powerUpCount)){ // user needs 270 points to win (230 food times 1 points each + 4 power-ups times 10 points each)
+     drawWin();
+     clearInterval(gameInterval);
+    }
+ 
+    
+ }; 
+ 
+//when pacman and ghosts collide they are drawn to the initial positions
+// user loses one live/heart
+// if there are no more lives/hearts left GAME OVER
 let restartGame = () => {
     createNewPacman();
     createGhosts();
@@ -134,6 +151,7 @@ let drawWin = () => {
     canvasContext.fillText("Winner", 150, 200);
 };
 
+//in each tile equal to 2, draw food for pacman
 let drawFoods = () => {
     for(let i =0; i < map.length; i++){
         for(let j = 0; j < map[0].length; j++){
@@ -149,7 +167,38 @@ let drawFoods = () => {
     }
 }
 
-// Draw heart shape
+//in each tile equal to 4 draw a cherry power-up
+let drawPowerUp = () => {
+    for (let i = 0; i < map.length; i++) {
+        for (let j = 0; j < map[0].length; j++) {
+            if (map[i][j] == 4) {
+                let x = j * oneBlockSize + oneBlockSize / 2; // Center x
+                let y = i * oneBlockSize + oneBlockSize / 2; // Center y
+                let radius = oneBlockSize / 6;              // Radius of the cherry circles
+                
+                // Draw cherry
+                canvasContext.beginPath();
+                canvasContext.arc(x - radius, y, radius, 0, Math.PI * 2); // Left cherry
+                canvasContext.arc(x + radius, y, radius, 0, Math.PI * 2); // Right cherry
+                canvasContext.fillStyle = "red";
+                canvasContext.fill();
+
+                // Draw stem
+                canvasContext.beginPath();
+                canvasContext.moveTo(x - radius, y);                  // Left cherry stem start
+                canvasContext.lineTo(x, y - radius * 2);              // Stem apex
+                canvasContext.lineTo(x + radius, y);                  // Right cherry stem end
+                canvasContext.strokeStyle = "green";
+                canvasContext.lineWidth = 2;
+                canvasContext.stroke();
+            }
+        }
+    }
+};
+
+
+
+// Draw heart shape representing lives
 function drawHeart(x, y, size, color) {
     canvasContext.fillStyle = color;
     canvasContext.beginPath();
@@ -160,7 +209,7 @@ function drawHeart(x, y, size, color) {
     canvasContext.fill();
 }
 
-
+// draw hearts at the top right side of screen
 let drawLives = () => {
     const startX = canvas.width - (3* oneBlockSize);
     const startY = oneBlockSize/2 - wallOffset;
@@ -186,7 +235,7 @@ let drawLives = () => {
     
 };
 
-
+//draw score at the top left side of the screen
 let drawScore = () => {
 
 canvasContext.fillStyle="white";
@@ -201,7 +250,7 @@ else if (canvas.width <= 400) {
 canvasContext.fillText("Score: " + score, oneBlockSize , oneBlockSize/2 + 4.5); // position of score at top left of the screen
 }
 
-
+//draw ghosts
 let drawGhosts = () => {
     for(let i = 0; i < ghosts.length; i++){
         ghosts[i].draw();
@@ -209,11 +258,13 @@ let drawGhosts = () => {
 
 }
 
+//draw the game elements: wall, food, power-up, pacman, ghosts, score, lives
 let draw = () => {
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     createRect(0, 0, canvas.width, canvas.height, "black"); 
     drawWalls();
     drawFoods();
+    drawPowerUp();
     pacman.draw();
     drawScore();
     drawGhosts();
@@ -222,6 +273,7 @@ let draw = () => {
 
 let gameInterval = setInterval(gameLoop, 1000 / fps);
 
+// draw wall with blue borders and black within
 let drawWalls = () => {
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[0].length; j++) {
@@ -268,14 +320,14 @@ let drawWalls = () => {
     }
 };
 
-
+// pacman properties
 let createNewPacman = () => {
     pacman = new Pacman(
-      oneBlockSize,
-      oneBlockSize,
-      oneBlockSize,
-      oneBlockSize,
-      oneBlockSize / 5
+      oneBlockSize, // x position second row
+      oneBlockSize, // y position second column
+      oneBlockSize, // pacman width
+      oneBlockSize, // pacman height
+      oneBlockSize / 5 //pacman speed
   
      );
   };
@@ -286,14 +338,14 @@ let createNewPacman = () => {
 let calculateCanvasSize = () => {
     const screenWidth = window.innerWidth;
 
-    if (screenWidth < maxCanvasWidth) {
+    if (screenWidth < maxCanvasWidth) {  //if screen is smaller than 600px, find the biggest number up to screenwidth which divided by 20 is 0 , set it as canvas width
         canvasWidth = Math.floor(screenWidth / 20) * 20;
     } else {
-        canvasWidth = maxCanvasWidth;
+        canvasWidth = maxCanvasWidth; //else if screen is bigger than 600px or equal to it, set it as canvas width
     }
 
-    oneBlockSize = canvasWidth / 20;
-    canvasHeight = oneBlockSize * 22;
+    oneBlockSize = canvasWidth / 20; //one block will be canvas width divided by 20 columns
+    canvasHeight = oneBlockSize * 22; // canvas height will be one block time 22 rows
 
     // Calculate wall-related properties after oneBlockSize is determined
     wallSpaceWidth = oneBlockSize / 1.5;
@@ -302,6 +354,19 @@ let calculateCanvasSize = () => {
     // Set canvas dimensions
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+    
+    // set random targets across the map if pacman is not in range, ghosts will move to these tiles
+    randomTargetsForGhosts = [
+        {x: 1 * oneBlockSize, y: 1 * oneBlockSize},
+        {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
+        {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
+        {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
+        //{x: 9 * oneBlockSize, y: 10 * oneBlockSize},
+        {x: 1 * oneBlockSize, y: 20 * oneBlockSize},
+        {x: 12 * oneBlockSize, y: 20 * oneBlockSize},
+        {x: 9 * oneBlockSize, y: 20 * oneBlockSize},
+        {x:  5 * oneBlockSize, y: 20 * oneBlockSize},
+    ];
 };
 
 // Initialize the canvas size on load
@@ -312,7 +377,7 @@ calculateCanvasSize();
 // Add an event listener to recalculate canvas size when the window is resized
 window.addEventListener("resize", calculateCanvasSize);
 
-
+// ghosts properties
   let createGhosts = () => {
    ghosts = [];
    for(let i = 0; i < ghostCount; i++){
