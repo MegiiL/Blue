@@ -11,6 +11,9 @@ class Ghost{
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
         this.range = range;
+        this.initialX = x; // Store initial position
+        this.initialY = y; 
+        this.pulsationStartTime = null; // Initialize to track pulsation timing
         this.randomTargetIndex = parseInt(Math.random() * randomTargetsForGhosts.length);
         
         setInterval(() =>{
@@ -199,24 +202,44 @@ class Ghost{
     }
     
    
-    draw(){
+    draw() {
         canvasContext.save();
-        
-    //draw the ghost
-    canvasContext.drawImage(
-        ghostFrames,
-        this.imageX,  //ghost position in png
-        this.imageY,
-        this.imageWidth, // ghost width and height in png
-        this.imageHeight,
-        this.x,             // ghost position in map         
-        this.y,                      
-        oneBlockSize,         // scale to one block size width       
-        oneBlockSize          // scale to one block size height
-    );
-
+    
+        let scale = 1; // Default scale
+        if (ghostOverrideActive) {
+            if (!this.pulsationStartTime) {
+                this.pulsationStartTime = Date.now(); // Record the start time
+            }
+    
+            // Calculate the elapsed time since pulsation started
+            const elapsed = (Date.now() - this.pulsationStartTime) / 1000; // In seconds
+    
+            // Pulsation effect using sine wave
+            scale = 1 + 0.2 * Math.sin(elapsed * 2 * Math.PI); // Scale oscillates between 1.0 and 1.2
+        } else {
+            this.pulsationStartTime = null; // Reset when override is inactive
+        }
+    
+        // Adjust the ghost's position for scaling
+        const offsetX = (oneBlockSize * (1 - scale)) / 2;
+        const offsetY = (oneBlockSize * (1 - scale)) / 2;
+    
+        // Draw the ghost with pulsation scaling
+        canvasContext.drawImage(
+            ghostFrames,
+            this.imageX,  // Ghost position in PNG
+            this.imageY,
+            this.imageWidth, // Ghost width and height in PNG
+            this.imageHeight,
+            this.x + offsetX,             // Adjust position for scaling         
+            this.y + offsetY,                      
+            oneBlockSize * scale,         // Scale width       
+            oneBlockSize * scale          // Scale height
+        );
+    
         canvasContext.restore();
     }
+    
 
 
     getMapX(){
