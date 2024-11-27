@@ -24,22 +24,23 @@ class Ghost{
     this.randomTargetIndex = this.randomTargetIndex % 8;
    }
 
-
    moveProcess(){
-    if(this.isInRangeOfPacman()){
+    if (ghostOverrideActive) {
+        this.target = randomTargetsForGhosts[1]; // Override target
+    } else if (this.isInRangeOfPacman()) {
         this.target = pacman;
-    }else{
+    } else {
         this.target = randomTargetsForGhosts[this.randomTargetIndex];
     }
-   // console.log(Target for ghost at (${this.x}, ${this.y}) is (${this.target.x}, ${this.target.y}));  // Log target coordinates
-        this.changeDirectionIfPossible();
-        this.moveForwards();
-        if(this.checkCollision()){
-            this.moveBackwards();
-            return;
-        }
 
-     }
+    this.changeDirectionIfPossible();
+    this.moveForwards();
+    if (this.checkCollision()) {
+        this.moveBackwards();
+        return;
+    }
+}
+
 
    //moving backwards
    moveBackwards(){
