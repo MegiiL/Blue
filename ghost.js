@@ -206,6 +206,8 @@ class Ghost{
         canvasContext.save();
     
         let scale = 1; // Default scale
+        let opacity = 1; // Default opacity
+    
         if (ghostOverrideActive) {
             if (!this.pulsationStartTime) {
                 this.pulsationStartTime = Date.now(); // Record the start time
@@ -216,15 +218,21 @@ class Ghost{
     
             // Pulsation effect using sine wave
             scale = 1 + 0.2 * Math.sin(elapsed * 2 * Math.PI); // Scale oscillates between 1.0 and 1.2
+    
+            // Reduce opacity during pulsation
+            opacity = 0.5 + 0.5 * Math.abs(Math.sin(elapsed * 2 * Math.PI)); // Opacity oscillates between 0.5 and 1.0
         } else {
             this.pulsationStartTime = null; // Reset when override is inactive
         }
+    
+        // Apply opacity to the context
+        canvasContext.globalAlpha = opacity;
     
         // Adjust the ghost's position for scaling
         const offsetX = (oneBlockSize * (1 - scale)) / 2;
         const offsetY = (oneBlockSize * (1 - scale)) / 2;
     
-        // Draw the ghost with pulsation scaling
+        // Draw the ghost with pulsation scaling and reduced opacity
         canvasContext.drawImage(
             ghostFrames,
             this.imageX,  // Ghost position in PNG
