@@ -18,9 +18,10 @@ class Ghost{
         }, 10000)
     }
 
+    //change targets to keep moving if pacman is not near
    changeRandomDirection(){
     this.randomTargetIndex += 1;
-    this.randomTargetIndex = this.randomTargetIndex % 4;
+    this.randomTargetIndex = this.randomTargetIndex % 8;
    }
 
 
@@ -30,6 +31,7 @@ class Ghost{
     }else{
         this.target = randomTargetsForGhosts[this.randomTargetIndex];
     }
+   // console.log(Target for ghost at (${this.x}, ${this.y}) is (${this.target.x}, ${this.target.y}));  // Log target coordinates
         this.changeDirectionIfPossible();
         this.moveForwards();
         if(this.checkCollision()){
@@ -39,7 +41,7 @@ class Ghost{
 
      }
 
-   
+   //moving backwards
    moveBackwards(){
         switch(this.direction){
             case DIRECTION_RIGHT:
@@ -58,6 +60,7 @@ class Ghost{
         }
       }
 
+      //moving forwards
     moveForwards(){ 
         switch(this.direction){
             case DIRECTION_RIGHT:
@@ -76,6 +79,7 @@ class Ghost{
         }
      }
 
+     //check wall collison so they don't move across the wall
     checkCollision(){ 
         let isCollided = false;
        
@@ -90,7 +94,7 @@ class Ghost{
     }
 
    
-
+   //to calculate if pacman is near, make pacman target
     isInRangeOfPacman(){
         let xDistance = Math.abs(pacman.getMapX() - this.getMapX());
         let yDistance = Math.abs(pacman.getMapY() - this.getMapY());
@@ -125,69 +129,74 @@ class Ghost{
 
      }
 
-    calculateNewDirection(map, destX, destY){
+     calculateNewDirection(map, destX, destY){
         let mp = [];
-        for(let i = 0; i < map.length; i++){
-            mp[i] = map[i].slice();
+        for (let i = 0; i < map.length; i++) {
+            mp[i] = map[i].slice(); // Clone the map
         }
-
+    
         let queue = [{
             x: this.getMapX(),
             y: this.getMapY(),
             moves: [],
-        },
-    ];
-
-    while(queue.length > 0){
-        let poped = queue.shift();
-        if(poped.x == destX && poped.y == destY ){
-            return poped.moves[0];
-        }else{
-            mp[poped.y][poped.x] = 1;
-            let neigbourList = this.addNeigbours(poped, mp);
-            for(let i = 0; i < neigbourList.length; i++){
-                queue.push(neigbourList[i]);
+        }];
+        
+    
+        while(queue.length > 0){
+            let poped = queue.shift();
+            if(poped.x == destX && poped.y == destY ){
+                return poped.moves[0];
+            }else{
+                mp[poped.y][poped.x] = 1;
+                let neigbourList = this.addNeigbours(poped, mp);
+                for(let i = 0; i < neigbourList.length; i++){
+                    queue.push(neigbourList[i]);
+                }
+    
             }
-
         }
+    
+       // return DIRECTION_BOTTOM; // Default direction if no path is found
     }
-    return DIRECTION_UP; // default
-
-    }
+    
 
 
     addNeigbours(poped, mp){
-       let queue = [];
-       let numOfRows = mp.length;
-       let numOfColumns = mp[0].length;
-
-       if(poped.x - 1 >= 0 && poped.x - 1 < numOfRows && mp[poped.y][poped.x - 1] != 1){
-        let tempMoves = poped.moves.slice();
-        tempMoves.push(DIRECTION_LEFT);
-        queue.push({x: poped.x - 1, y: poped.y, moves: tempMoves});
-       }
-
-       if(poped.x + 1 >= 0 && poped.x + 1 < numOfRows && mp[poped.y][poped.x + 1] != 1){
-        let tempMoves = poped.moves.slice();
-        tempMoves.push(DIRECTION_RIGHT);
-        queue.push({x: poped.x + 1, y: poped.y, moves: tempMoves});
-       }
-
-       if(poped.y - 1 >= 0 && poped.y - 1 < numOfColumns && mp[poped.y - 1][poped.x] != 1){
-        let tempMoves = poped.moves.slice();
-        tempMoves.push(DIRECTION_UP);
-        queue.push({x: poped.x, y: poped.y - 1, moves: tempMoves});
-       }
-
-       if(poped.y + 1 >= 0 && poped.y + 1 < numOfColumns && mp[poped.y + 1][poped.x] != 1){
-        let tempMoves = poped.moves.slice();
-        tempMoves.push(DIRECTION_BOTTOM);
-        queue.push({x: poped.x, y: poped.y + 1, moves: tempMoves});
-       }
-
-       return queue;
+        let queue = [];
+        let numOfRows = mp.length;
+        let numOfColumns = mp[0].length;
+    
+        // Check left direction
+        if(poped.x - 1 >= 0 && mp[poped.y][poped.x - 1] != 1){ // left
+            let tempMoves = poped.moves.slice();
+            tempMoves.push(DIRECTION_LEFT);
+            queue.push({x: poped.x - 1, y: poped.y, moves: tempMoves});
+        }
+    
+        // Check right direction
+        if(poped.x + 1 < numOfColumns && mp[poped.y][poped.x + 1] != 1){ // right
+            let tempMoves = poped.moves.slice();
+            tempMoves.push(DIRECTION_RIGHT);
+            queue.push({x: poped.x + 1, y: poped.y, moves: tempMoves});
+        }
+    
+        // Check up direction
+        if(poped.y - 1 >= 0 && mp[poped.y - 1][poped.x] != 1){ // up
+            let tempMoves = poped.moves.slice();
+            tempMoves.push(DIRECTION_UP);
+            queue.push({x: poped.x, y: poped.y - 1, moves: tempMoves});
+        }
+    
+        // Check down direction
+        if(poped.y + 1 < numOfRows && mp[poped.y + 1][poped.x] != 1){ // down
+            let tempMoves = poped.moves.slice();
+            tempMoves.push(DIRECTION_BOTTOM);
+            queue.push({x: poped.x, y: poped.y + 1, moves: tempMoves});
+        }
+    
+        return queue;
     }
-
+    
    
     draw(){
         canvasContext.save();
