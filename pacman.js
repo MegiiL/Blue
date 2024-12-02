@@ -1,8 +1,8 @@
 class Pacman{
     constructor(x, y, width, height, speed){
-        this.x = x;
-        this.y = y;
-        this.width = width;
+        this.x = x; // x position
+        this.y = y; // y position top left  corner
+        this.width = width; 
         this.height = height;
         this.speed = speed;
         this.direction = DIRECTION_RIGHT; //current direction
@@ -26,27 +26,34 @@ class Pacman{
 
      }
      
-    //when pacman moves across a food tile, make it equal to 3 to leave it black and increase score +1 
+    //when pacman moves across a food tile, make it equal to 3 to leave it black
+    // increase score +1 
+    // decrement foodCount with 1
     eat(){ 
         for(let i = 0; i < map.length; i++){
             for(let j = 0; j < map[0].length; j++){
                 if(map[i][j] == 2 && this.getMapX() == j && this.getMapY() == i){
                     map[i][j] = 3;
                     score++;
+                    foodCount--;
                 }
             }
         }
 
     }
 
-    //when pacman moves across a cherry power-up tile, make it equal to 3 to leave it black and increase score +10
+    //when pacman moves across a cherry power-up tile, make it equal to 3 to leave it black 
+    //increase score +10
+    //decrement powerUpCount with 1
     eatPowerUp(){ 
         for(let i = 0; i < map.length; i++){
             for(let j = 0; j < map[0].length; j++){
                 if(map[i][j] == 4 && this.getMapX() == j && this.getMapY() == i){
                     map[i][j] = 3;
                     score += 10;
-    
+                    powerUpCount--;
+
+                    //set a 8s timer for ghosts to be vulnerable and move away from pacman
                     // Activate ghost override
                     ghostOverrideActive = true;
                     clearTimeout(ghostOverrideTimer); // Clear any previous timers to avoid stacking
