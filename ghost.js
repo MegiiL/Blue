@@ -1,20 +1,20 @@
 class Ghost{
     constructor(x, y, width, height, speed, imageX, imageY, imageWidth, imageHeight, range){
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.x = x; // x position
+        this.y = y; // y position middle of map
+        this.width = width; //ghost width in canvas
+        this.height = height; //ghost height in canvas
         this.speed = speed;
         this.direction = DIRECTION_RIGHT;
-        this.imageX = imageX;
-        this.imageY = imageY;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
+        this.imageX = imageX; // ghost x position in PNG
+        this.imageY = imageY; //ghost y position in PNG
+        this.imageWidth = imageWidth; //ghost width in PNG
+        this.imageHeight = imageHeight; //ghost height in PNG
         this.range = range;
         this.initialX = x; // Store initial position
         this.initialY = y; 
         this.pulsationStartTime = null; // Initialize to track pulsation timing
-        this.randomTargetIndex = parseInt(Math.random() * randomTargetsForGhosts.length);
+        this.randomTargetIndex = parseInt(Math.random() * randomTargetsForGhosts.length); //index for one of the ghosts random target array to keep moving
         
         setInterval(() =>{
             this.changeRandomDirection()
@@ -28,11 +28,12 @@ class Ghost{
    }
 
    moveProcess(){
+    // if pacman eats the power-up target second location of random targets array
     if (ghostOverrideActive) {
         this.target = randomTargetsForGhosts[1]; // Override target
-    } else if (this.isInRangeOfPacman()) {
+    } else if (this.isInRangeOfPacman()) { //if pacman is near target pacman
         this.target = pacman;
-    } else {
+    } else { //else target a random location from the array
         this.target = randomTargetsForGhosts[this.randomTargetIndex];
     }
 
@@ -205,9 +206,10 @@ class Ghost{
     draw() {
         canvasContext.save();
     
-        let scale = 1; // Default scale
-        let opacity = 1; // Default opacity
+        let scale = 1; // Default scale for pulsation effect
+        let opacity = 1; // Default opacity for transparent effect
     
+        //during the 8 seconds period start pulsation and opacity fluctuation
         if (ghostOverrideActive) {
             if (!this.pulsationStartTime) {
                 this.pulsationStartTime = Date.now(); // Record the start time
