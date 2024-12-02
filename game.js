@@ -8,6 +8,7 @@ const ghostFrames = document.getElementById("ghosts"); // 4 ghosts
 let canvasWidth, canvasHeight, oneBlockSize;
 // Maximum canvas width constraint
 const maxCanvasWidth = 600;
+//Variables to mofidy the wall setting and create blocks
 let wallSpaceWidth;
 let wallOffset;
 
@@ -18,11 +19,12 @@ let foodColor = "#ffff4d"; // yellow food
 let score = 0;  //user score
 let ghosts = []; //ghosts array
 let randomTargetsForGhosts = []; // random targets for ghosts array
-let ghostCount = 4; 
+let ghostCount = 4; // number of ghosts
 let lives = 3; // 3 tries for user within the game
-let foodCount = 0; //useful to calculate total winning score
-let powerUpCount = 0; //userful to calculate total winning score
+let foodCount = 0; //useful to calculate user score and winning condition
+let powerUpCount = 0; //userful to calculate user score and winning condition
 
+//Variables useful during the power-up 
 let ghostOverrideActive = false;
 let ghostOverrideTimer = null;
 
@@ -78,7 +80,7 @@ let map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
-// Count how many foods to calculate total winning score, one food is worth one point
+// Count how many foods to calculate user score
 //if tile = 2 it is food
 for(let i =0; i < map.length; i++){        
     for(let j = 0; j < map[0].length; j++){
@@ -88,7 +90,7 @@ for(let i =0; i < map.length; i++){
     }
 }
 
-// Count how many power-ups to calculate total winning score, one power-up is worth ten points
+// Count how many power-ups to calculate user score
 //if tile = 4 it is power-up
 for(let i =0; i < map.length; i++){
     for(let j = 0; j < map[0].length; j++){
@@ -114,13 +116,14 @@ let update = () => {
     ghosts.forEach(ghost => ghost.moveProcess());
 
     // Handle collision logic
-    if (pacman.checkGhostCollision(ghosts)) {
-        if (ghostOverrideActive) {
+    if (pacman.checkGhostCollision(ghosts)) { //if pacman and ghost collide
+        if (ghostOverrideActive) { // during the 8 seconds of eating the power-up
             ghosts.forEach(ghost => {
                 if (pacman.getMapX() === ghost.getMapX() && pacman.getMapY() === ghost.getMapY()) {
                     // Draw the ghost at its initial position
                     ghost.x = ghost.initialX;
                     ghost.y = ghost.initialY;
+                    score+=20; // increase user score by 20 points for ghost eaten
                 }
             });
         } else {
@@ -129,7 +132,7 @@ let update = () => {
     }
 
     // Check for win condition
-    if (score >= (foodCount + 10 * powerUpCount)) { 
+    if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
         drawWin();
         clearInterval(gameInterval);
     }
@@ -338,8 +341,8 @@ let drawWalls = () => {
 // pacman properties
 let createNewPacman = () => {
     pacman = new Pacman(
-      oneBlockSize, // x position second row
-      oneBlockSize, // y position second column
+      oneBlockSize, // x position 
+      oneBlockSize, // y position 
       oneBlockSize, // pacman width
       oneBlockSize, // pacman height
       oneBlockSize / 5 //pacman speed
@@ -397,26 +400,26 @@ window.addEventListener("resize", calculateCanvasSize);
    ghosts = [];
    for(let i = 0; i < ghostCount; i++){
     let newGhost = new Ghost(
-        9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column , can remove the condition?
+        9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column 
         10 * oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 11th row
         oneBlockSize, // take one block size width
         oneBlockSize, // take one block size height
         (oneBlockSize/5) /2, // ghost speed
         ghostImageLocations[i % 4].x, // x image location
         ghostImageLocations[i % 4].y, // y image location
-        124, // ghost width
-        116, // ghost height
+        124, // ghost width in png
+        116, // ghost height in png
         6 + i // range
 
     );
-    ghosts.push(newGhost);
+    ghosts.push(newGhost); //add to ghost array
    }
   }
   createNewPacman();
   createGhosts();
   gameLoop(); 
 
-
+// pacman movement on desktop using A/D W/S or arrow keys
   window.addEventListener("keydown", (event) =>{
     let k = event.keyCode;
 
