@@ -189,8 +189,8 @@ class Pacman{
         20,                          // Source height (frame height in the sprite sheet)
         this.x,                      // Destination x
         this.y,                      // Destination y
-        oneBlockSize,                // Scale to oneBlockSize (30px)
-        oneBlockSize                 // Scale to oneBlockSize (30px)
+        oneBlockSize,               // Scale to oneBlockSize (30px)
+        oneBlockSize              // Scale to oneBlockSize (30px)
     );
 
         canvasContext.restore();
