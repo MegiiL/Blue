@@ -21,13 +21,19 @@ let ghosts = []; //ghosts array
 let randomTargetsForGhosts = []; // random targets for ghosts array
 let ghostCount = 4; // number of ghosts
 let lives = 3; // 3 tries for user within the game
-let foodCount = 0; //useful to calculate user score and winning condition
-let powerUpCount = 0; //userful to calculate user score and winning condition
+let foodCount; //useful to calculate user score and winning condition
+let powerUpCount; //userful to calculate user score and winning condition
 
 //Variables useful during the power-up 
 let ghostOverrideActive = false;
 let ghostOverrideTimer = null;
 
+let gameStarted = false;  // Flag to control when the game starts
+let paused = false;  // Flag to control the paused state
+// Pause button
+const pauseButton = document.getElementById('pauseButton');
+
+let gameResult;
 
 
 // wall, food 
@@ -101,6 +107,93 @@ for(let i =0; i < map.length; i++){
     }
 }
 
+//Reset map, score, lives since they change during the game
+//Set gameStarted to initial values to continue playing
+//Create pacman and ghosts to their initial positions
+//Continue with gameLoop to draw/move all elements 
+let replayGame = () => {
+    map = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 4, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 1, 5, 5, 1, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 1, 1, 1, 1, 2, 1, 2, 1, 5, 5, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+        [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
+        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+        [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ];
+    gameStarted = true;
+    paused = false;
+    score = 0;
+    lives = 3;
+    createNewPacman();
+    createGhosts();
+    gameLoop();
+
+};
+
+
+// Show the game over screen
+function showGameOverScreen(gameResult) {
+    //pause game when game finishes
+    gameStarted = false;
+    // score holds the user's score
+    const resultMessage = document.getElementById('resultMessage');
+
+    if(gameResult == true){ //Win
+        resultMessage.innerHTML = `Winner!<br>Your score: ${score}`;  // show the total score
+    }else { 
+        resultMessage.innerHTML = `Try again!<br>Your score: ${score}`;   // Lose and show the total score
+    }
+    
+    document.getElementById('gameOverScreen').style.display = 'flex';  // Show the game over screen
+}
+
+// Start the game loop when "Play" button is clicked
+document.getElementById('playButton').addEventListener('click', function() {
+    document.getElementById('welcomeScreen').style.display = 'none'; //welcome screen dissapears
+    pauseButton.style.display = 'block'; // Show the pause button
+
+    gameStarted = true;
+    paused = false;  // Ensure the game is not paused initially
+   
+});
+
+// Replay the game when the "Replay" button is clicked
+document.getElementById('replayButton').addEventListener('click', function() {
+    document.getElementById('gameOverScreen').style.display = 'none';
+    replayGame(); //reset all changed elements and recreate pacman/ghosts
+   
+});
+
+// Pause Button Event Listener
+pauseButton.addEventListener('click', function() {
+    
+    paused = !paused;  // Toggle pause state
+    
+    if (paused) {
+        pauseButton.textContent = '▷';  // Change button text to 'Resume'
+    } else {
+        pauseButton.textContent = '||';  // Change button text to 'Pause'
+    }
+});
+
+
+
 //gameloop to draw and update the elements
 let gameLoop = () => {
     draw();
@@ -110,6 +203,8 @@ let gameLoop = () => {
 
 //game logic
 let update = () => {
+    //if play/replay button is clicked and game is not paused continue with the logic
+    if(gameStarted && !paused){
     pacman.moveProcess();
     pacman.eat();
     pacman.eatPowerUp();
@@ -121,26 +216,27 @@ let update = () => {
         if (ghostOverrideActive) { // during the 8 seconds of eating the power-up
             ghosts.forEach(ghost => {
                 if (pacman.getMapX() === ghost.getMapX() && pacman.getMapY() === ghost.getMapY()) {
-                    // Draw the ghost at its initial position
+                    // Draw the ghost at its initial position as pacman eats the ghost
                     ghost.x = ghost.initialX;
                     ghost.y = ghost.initialY;
                     score+=20; // increase user score by 20 points for ghost eaten
                 }
             });
         } else {
-            restartGame();
+            restartGame(); //lose one heart/life 
         }
     }
 
     // Check for win condition
     if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
-        drawWin();
-        clearInterval(gameInterval);
+        gameResult = true; //win
+        showGameOverScreen(gameResult);
     }
+}
 };
 
  
-//when pacman and ghosts collide they are drawn to the initial positions
+//under normal circumstances: when pacman and ghosts collide they are drawn to the initial positions
 // user loses one live/heart
 // if there are no more lives/hearts left GAME OVER
 let restartGame = () => {
@@ -148,27 +244,12 @@ let restartGame = () => {
     createGhosts();
     lives--;
     if(lives == 0){
-        gameOver();
+        gameResult = false; //lose
+        showGameOverScreen(gameResult);
     }
 
 };
 
-let gameOver = () => {
-    drawGameOver();
-    clearInterval(gameInterval);
-};
-
-let drawGameOver = () => {
-    canvasContext.font = "20px Emulogic";
-    canvasContext.fillStyle = "white";
-    canvasContext.fillText("Game Over", 200, 200);
-};
-
-let drawWin = () => {
-    canvasContext.font = "20px Emulogic";
-    canvasContext.fillStyle = "white";
-    canvasContext.fillText("Winner", 150, 200);
-};
 
 //in each tile equal to 2, draw food for pacman
 let drawFoods = () => {
@@ -230,8 +311,10 @@ function drawHeart(x, y, size, color) {
 
 // draw hearts at the top right side of screen
 let drawLives = () => {
-    const startX = canvas.width - (3* oneBlockSize);
+    const startX = 9.5 * oneBlockSize;
     const startY = oneBlockSize/2 - wallOffset;
+   // const startX = canvas.width - (3* oneBlockSize);
+   // const startY = oneBlockSize/2 - wallOffset;
     let heartSize;
 
     if (canvas.width <= 200) {
@@ -250,6 +333,7 @@ let drawLives = () => {
             drawHeart(startX + i * 22, startY, heartSize, "red");
         }
     }
+  
 
     
 };
@@ -259,11 +343,11 @@ let drawScore = () => {
 
 canvasContext.fillStyle="white";
 if (canvas.width <= 200) {
-    canvasContext.font = "10px Courier"; }// Smaller font for screens up to 400px
+    canvasContext.font = "7px Courier"; }// Smaller font for screens up to 200px
 else if (canvas.width <= 400) {
-    canvasContext.font = "16px Courier"; // Smaller font for screens up to 400px
+    canvasContext.font = "15px Courier"; // Smaller font for screens up to 400px
 } else if (canvas.width <= 600) {
-    canvasContext.font = "18px Courier"; // Medium font for screens between 401px and 600px
+    canvasContext.font = "17px Courier"; // Medium font for screens between 401px and 600px
 }
 
 canvasContext.fillText("Score: " + score, oneBlockSize , oneBlockSize/2 + 4.5); // position of score at top left of the screen
@@ -305,7 +389,7 @@ let drawWalls = () => {
                     wallColor
                 );
 
-                if( j > 0 && map[i][j -1] == 1){
+               if( j > 0 && map[i][j -1] == 1){
                     createRect(j * oneBlockSize, i * oneBlockSize + wallOffset,
                         wallSpaceWidth + wallOffset,
                         wallSpaceWidth,
@@ -373,6 +457,24 @@ let calculateCanvasSize = () => {
     // Set canvas dimensions
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+
+    pauseButton.style.top = `${canvas.height - ( 21.75 * oneBlockSize)}px`; // Vertical position
+    pauseButton.style.left = `${canvas.width - 1.75 * oneBlockSize }px`; // Horizontal position
+
+    if (canvas.width <= 200) {
+        pauseButton.style.width = "5px"; // Button width
+        pauseButton.style.height = "5px"; // Button height
+        pauseButton.style.fontSize = "1px"; // Smaller font for screens up to 200px
+    } else if (canvas.width <= 400) {
+        pauseButton.style.width = "10px"; // Button width
+        pauseButton.style.height = "10px"; // Button height
+        pauseButton.style.fontSize = "5px"; // Smaller font for screens up to 400px
+    } else if (canvas.width <= 600) {
+        pauseButton.style.width = "17px"; // Button width
+        pauseButton.style.height = "17px"; // Button height
+        pauseButton.style.fontSize = "10px"; // Medium font for screens between 401px and 600px
+    }
+  
     
     // set random targets across the map if pacman is not in range, ghosts will move to these tiles
     randomTargetsForGhosts = [
