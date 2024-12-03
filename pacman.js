@@ -19,7 +19,7 @@ class Pacman{
     moveProcess(){
         this.changeDirectionIfPossible();
         this.moveForwards();
-        if(this.checkCollision()){
+        if(this.checkCollision() || this.checkGhostSpaceCollision()){
             this.moveBackwards();
             return;
         }
@@ -119,6 +119,20 @@ class Pacman{
     return isCollided;
     }
 
+    //Check ghosts space so it doesn't enter inside it
+    checkGhostSpaceCollision(){ 
+        let isGhostSpace = false;
+       
+        if(map[this.getMapY()][this.getMapX()] == 5 ||
+        map[this.getMapYRightSide()][this.getMapX()] == 5 ||
+        map[this.getMapY()][this.getMapXRightSide()] == 5 ||
+        map[this.getMapYRightSide()][this.getMapXRightSide()] == 5
+    ){
+        isGhostSpace = true;
+    }
+    return isGhostSpace;
+    }
+
     //check ghosts collision with pacman to reset the game
     checkGhostCollision(ghosts){ 
         for(let i = 0; i < ghosts.length; i++){
@@ -136,7 +150,7 @@ class Pacman{
         let tempDirection = this.direction;
         this.direction = this.nextDirection;
         this.moveForwards();
-        if(this.checkCollision()){
+        if(this.checkCollision() || this.checkGhostSpaceCollision()){
             this.moveBackwards();
             this.direction = tempDirection;
         }else{
