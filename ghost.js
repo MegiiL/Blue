@@ -84,14 +84,15 @@ class Ghost{
         }
      }
 
-     //check wall collison so they don't move across the wall
+    //check wall collision so it doesn't move across the wall
     checkCollision(){ 
+        let tolerance = 0.01; // Small margin to prevent getting stuck
         let isCollided = false;
        
-        if(map[this.getMapY()][this.getMapX()] == 1 ||
-        map[this.getMapYRightSide()][this.getMapX()] == 1 ||
-        map[this.getMapY()][this.getMapXRightSide()] == 1 ||
-        map[this.getMapYRightSide()][this.getMapXRightSide()] == 1
+        if(map[Math.floor((this.y + tolerance) / oneBlockSize)][Math.floor((this.x + tolerance) / oneBlockSize)] === 1 ||
+        map[Math.floor((this.y + tolerance) / oneBlockSize)][Math.floor((this.x + oneBlockSize - tolerance) / oneBlockSize)] === 1 ||
+        map[Math.floor((this.y + oneBlockSize - tolerance) / oneBlockSize)][Math.floor((this.x + tolerance) / oneBlockSize)] === 1 ||
+        map[Math.floor((this.y + oneBlockSize - tolerance) / oneBlockSize)][Math.floor((this.x + oneBlockSize - tolerance) / oneBlockSize)] === 1
     ){
         isCollided = true;
     }
@@ -252,19 +253,19 @@ class Ghost{
     
 
 
-    getMapX(){
-        return parseInt(this.x / oneBlockSize);
+   getMapX() {
+        return Math.floor(this.x / oneBlockSize);
     }
-
-    getMapY(){
-        return parseInt(this.y / oneBlockSize);
+    
+    getMapY() {
+        return Math.floor(this.y / oneBlockSize);
     }
-
-    getMapXRightSide(){
-        return parseInt((this.x + 0.9999 * oneBlockSize)/ oneBlockSize);
+    
+    getMapXRightSide() {
+        return Math.floor((this.x + oneBlockSize - 0.01) / oneBlockSize);
     }
-
-    getMapYRightSide(){
-        return parseInt((this.y + 0.9999 * oneBlockSize)/ oneBlockSize);
+    
+    getMapYRightSide() {
+        return Math.floor((this.y + oneBlockSize - 0.01) / oneBlockSize);
     }
 } 
