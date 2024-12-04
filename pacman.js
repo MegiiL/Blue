@@ -32,10 +32,13 @@ class Pacman{
     eat(){ 
         for(let i = 0; i < map.length; i++){
             for(let j = 0; j < map[0].length; j++){
-                if(map[i][j] == 2 && this.getMapX() == j && this.getMapY() == i){
+                if(map[i][j] == 2 &&
+                    Math.abs(this.x - (j * oneBlockSize)) < this.speed &&
+                    Math.abs(this.y - (i * oneBlockSize)) < this.speed){
                     map[i][j] = 3;
                     score++;
                     foodCount--;
+                    console.log(foodCount);
                 }
             }
         }
@@ -48,7 +51,9 @@ class Pacman{
     eatPowerUp(){ 
         for(let i = 0; i < map.length; i++){
             for(let j = 0; j < map[0].length; j++){
-                if(map[i][j] == 4 && this.getMapX() == j && this.getMapY() == i){
+                if(map[i][j] == 4 &&
+                    Math.abs(this.x - (j * oneBlockSize)) < this.speed &&
+                    Math.abs(this.y - (i * oneBlockSize)) < this.speed){
                     map[i][j] = 3;
                     score += 10;
                     powerUpCount--;
