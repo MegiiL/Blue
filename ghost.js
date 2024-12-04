@@ -253,7 +253,8 @@ class Ghost{
     
 
 
-   getMapX() {
+ 
+    getMapX() {
         return Math.floor(this.x / oneBlockSize);
     }
     
