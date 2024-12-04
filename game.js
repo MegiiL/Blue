@@ -227,12 +227,12 @@ let update = () => {
         }
     }
 
-    // Check for win condition
+}
+      // Check for win condition
     if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
         gameResult = true; //win
         showGameOverScreen(gameResult);
     }
-}
 };
 
  
