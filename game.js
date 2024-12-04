@@ -1,3 +1,6 @@
+//GHOSTS DONT MOVE PROPERLY PROBLEM
+
+
 const canvas = document.getElementById("canvas");
 const canvasContext = canvas.getContext("2d");
 const pacmanFrames = document.getElementById("animations"); //7 pacman frames to look like he is biting
@@ -21,8 +24,8 @@ let ghosts = []; //ghosts array
 let randomTargetsForGhosts = []; // random targets for ghosts array
 let ghostCount = 4; // number of ghosts
 let lives = 3; // 3 tries for user within the game
-let foodCount; //useful to calculate user score and winning condition
-let powerUpCount; //userful to calculate user score and winning condition
+let foodCount = 0; //useful to calculate user score and winning condition
+let powerUpCount = 0; //userful to calculate user score and winning condition
 
 //Variables useful during the power-up 
 let ghostOverrideActive = false;
@@ -367,6 +370,7 @@ let draw = () => {
     createRect(0, 0, canvas.width, canvas.height, "black"); 
     drawWalls();
     drawFoods();
+    //console.log(foodCount);
     drawPowerUp();
     pacman.draw();
     drawScore();
