@@ -110,44 +110,6 @@ for(let i =0; i < map.length; i++){
     }
 }
 
-//Reset map, score, lives since they change during the game
-//Set gameStarted to initial values to continue playing
-//Create pacman and ghosts to their initial positions
-//Continue with gameLoop to draw/move all elements 
-let replayGame = () => {
-    map = [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
-        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-        [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
-        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-        [1, 2, 2, 4, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
-        [1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1],
-        [1, 2, 2, 2, 2, 2, 2, 2, 1, 5, 5, 1, 2, 2, 2, 2, 2, 2, 2, 1],
-        [1, 1, 1, 1, 1, 2, 1, 2, 1, 5, 5, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-        [1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
-        [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
-        [1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 1],
-        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-        [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
-        [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
-        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-        [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ];
-    gameStarted = true;
-    paused = false;
-    score = 0;
-    lives = 3;
-    createNewPacman();
-    createGhosts();
-    gameLoop();
-
-};
 
 
 // Show the game over screen
@@ -199,15 +161,16 @@ pauseButton.addEventListener('click', function() {
 
 //gameloop to draw and update the elements
 let gameLoop = () => {
+    if(gameStarted && !paused){
     draw();
     update();
+    }
 };
 
 
 //game logic
 let update = () => {
     //if play/replay button is clicked and game is not paused continue with the logic
-    if(gameStarted && !paused){
     pacman.moveProcess();
     pacman.eat();
     pacman.eatPowerUp();
@@ -229,13 +192,71 @@ let update = () => {
             restartGame(); //lose one heart/life 
         }
     }
-
-}
       // Check for win condition
-    if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
+      if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
         gameResult = true; //win
+        console.log(foodCount);
+        console.log(powerUpCount);
+        console.log('win');
         showGameOverScreen(gameResult);
     }
+
+};
+
+//Reset map, score, lives since they change during the game
+//Set gameStarted to initial values to continue playing
+//Create pacman and ghosts to their initial positions
+//Continue with gameLoop to draw/move all elements 
+let replayGame = () => {
+    map = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 4, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 1, 5, 5, 1, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 1, 1, 1, 1, 2, 1, 2, 1, 5, 5, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+        [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
+        [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+        [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ];
+    score = 0;
+    lives = 3;
+    foodCount = 0;
+    for(let i =0; i < map.length; i++){        
+        for(let j = 0; j < map[0].length; j++){
+           if(map[i][j] == 2){
+             foodCount++;
+           }
+        }
+    }
+    
+    powerUpCount= 0;
+    for(let i =0; i < map.length; i++){
+        for(let j = 0; j < map[0].length; j++){
+           if(map[i][j] == 4){
+             powerUpCount++;
+           }
+        }
+    }
+    createNewPacman();
+    createGhosts();
+    gameStarted = true;
+    paused = false;
+    gameLoop();
+
 };
 
  
@@ -247,6 +268,9 @@ let restartGame = () => {
     createGhosts();
     lives--;
     if(lives == 0){
+        console.log(foodCount);
+        console.log(powerUpCount);
+        console.log('lose');
         gameResult = false; //lose
         showGameOverScreen(gameResult);
     }
