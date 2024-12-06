@@ -1,6 +1,6 @@
 class Pacman{
     constructor(x, y, width, height, speed){
-        this.x = x; // x position
+        this.x = x; // x positio
         this.y = y; // y position top left  corner
         this.width = width; 
         this.height = height;
