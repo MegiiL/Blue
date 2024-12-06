@@ -1,6 +1,6 @@
 class Ghost{
     constructor(x, y, width, height, speed, imageX, imageY, imageWidth, imageHeight, range){
-        this.x = x; // x positio
+        this.x = x; // x position
         this.y = y; // y position middle of map
         this.width = width; //ghost width in canvas
         this.height = height; //ghost height in canvas
