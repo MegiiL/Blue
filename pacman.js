@@ -1,4 +1,4 @@
-class Pacman{
+class Pacmn{
     constructor(x, y, width, height, speed){
         this.x = x; // x position
         this.y = y; // y position top left  corner
