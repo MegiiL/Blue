@@ -1,4 +1,4 @@
-
+//GHOSTS DONT MOVE PROPERLY PROBLEM
 
 
 const canvas = document.getElementById("canvas");
