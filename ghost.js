@@ -1,4 +1,4 @@
-class Ghost{
+class Gost{
     constructor(x, y, width, height, speed, imageX, imageY, imageWidth, imageHeight, range){
         this.x = x; // x position
         this.y = y; // y position middle of map
