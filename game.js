@@ -11,6 +11,7 @@ const ghostFrames = document.getElementById("ghosts"); // 4 ghosts
 let canvasWidth, canvasHeight, oneBlockSize;
 // Maximum canvas width constraint
 const maxCanvasWidth = 600;
+const maxCanvasHeight = 660; // 22 rows * 30px per block as a default
 //Variables to mofidy the wall setting and create blocks
 let wallSpaceWidth;
 let wallOffset;
@@ -468,15 +469,23 @@ let createNewPacman = () => {
 // Function to calculate canvas size
 let calculateCanvasSize = () => {
     const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
     if (screenWidth < maxCanvasWidth) {  //if screen is smaller than 600px, find the biggest number up to screenwidth which divided by 20 is 0 , set it as canvas width
         canvasWidth = Math.floor(screenWidth / 20) * 20;
     } else {
-        canvasWidth = maxCanvasWidth; //else if screen is bigger than 600px or equal to it, set it as canvas width
+        canvasWidth = maxCanvasWidth; //else if screen is bigger than 600px or equal to it, set canvas width as 600px
     }
 
     oneBlockSize = canvasWidth / 20; //one block will be canvas width divided by 20 columns
     canvasHeight = oneBlockSize * 22; // canvas height will be one block time 22 rows
+
+    // Adjust canvas height if it exceeds screen height
+    if (canvasHeight > screenHeight) {
+    canvasHeight = Math.floor(screenHeight / 22) * 22; 
+    oneBlockSize = canvasHeight / 22; 
+    canvasWidth = oneBlockSize * 20; 
+    }
 
     // Calculate wall-related properties after oneBlockSize is determined
     wallSpaceWidth = oneBlockSize / 1.5;
@@ -486,9 +495,18 @@ let calculateCanvasSize = () => {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    pauseButton.style.top = `${canvas.height - ( 21.75 * oneBlockSize)}px`; // Vertical position
-    pauseButton.style.left = `${canvas.width - 1.75 * oneBlockSize }px`; // Horizontal position
+    //canvas at the center point of the screen
+    canvas.style.position = 'absolute';
+    canvas.style.left = '50%';
+    canvas.style.top = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
 
+
+    pauseButton.style.top = `${canvas.height - ( 21.75 * oneBlockSize)}px`; // Vertical position
+    pauseButton.style.left = `${canvas.width - (1.75 * oneBlockSize) }px`; // Horizontal position
+
+
+    
     if (canvas.width <= 200) {
         pauseButton.style.width = "5px"; // Button width
         pauseButton.style.height = "5px"; // Button height
