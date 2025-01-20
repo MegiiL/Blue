@@ -5,70 +5,93 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Pacman</title>
+    <title> Visual </title>
     <link rel="stylesheet" href="style.css"> 
+
 </head>
 
 <body>
 
-    <div id="pongWrapper">
-    <canvas id="canvas"></canvas>
-    <!-- Initial welcome screen -->
+    <div id="canvasContainer">
+        <canvas id="canvas"></canvas>
+        <button id="pauseButton">||</button>
+    </div>
+    
+
+
+    <!-- Initial welcome screen containing: 1. Game name; 2. Rules, Points system, Moves and 2 results; 3. Play button-->
     <div id="welcomeScreen">
-        <h1>Pacman🍒</h1>
-        <div id="instructionsWrapper">
-            <div id="rules">
-                <h2> <b> Rules: </b> </h2>
-                <ul>
-                    <li>✧ Score as many points as possible </li>
-                    <li>✧ 3 lives in total </li>
-                    <li>✧ Pause at any time </li> <br>
 
-                    <h2> <b> Points: </b> </h2>
-                    <li>✧ Food is 1 point </li>
-                    <li>✧ Power-ups are 10 points </li>
-                    <li>✧ Ghosts are 20 points </li>
+    <h1>Pacman 🍒</h1>    
 
-                </ul>
-            </div>
-            <div id="moves">
-                <h2> <b> Moves: </b> </h2>
-                <ul>
-                    <li>✧ Desktop: A/D or ←/→ </li>
-                    <li>✧ Mobile: Swipe inside the walls </li> <br> <br>
-
-                    <h2> <b> Game Over: </b> </h2>
-                    <li>✧ Win: Eat all food and power-ups </li>
-                    <li>✧ Lose: Lose all lives </li>
-                </ul>
-            </div>
-        </div>
-        <button id="playButton">Play</button>
+    <div id="rules">
+        <h2> <b> Rules: </b> </h2>
+            <ul>
+            <li>✧ Score as many points as possible </li>
+            <li>✧ 3 lives in total </li>
+            <li>✧ Pause at any time </li> 
+            </ul>
+        
+            <h2> <b> Points: </b> </h2>
+            <ul>
+            <li>✧ Food is 1 point </li>
+            <li>✧ Power-ups are 10 points </li>
+            <li>✧ Ghosts are 20 points </li>
+        </ul>
     </div>
 
-    <!-- Game Over Screen -->
-    <div id="gameOverScreen">
-        <h1 id="gameOverMessage"> Game Over!</h1> <br>
-        <h2 id="resultMessage"></h2>  <!-- Placeholder for the result message -->
-        <button id="replayButton"> Replay </button>
+    <div id="moves">
+        <h2> <b> Moves: </b> </h2>
+        <ul>
+            <li>✧ Desktop: A/D or ←/→ </li>
+            <li>✧ Mobile: Swipe inside the walls </li> 
+        </ul>
+
+            <h2> <b> Game Over: </b> </h2>
+            <ul>
+            <li>✧ Win: Eat all food and power-ups </li>
+            <li>✧ Lose: Lose all lives </li>
+        </ul>
     </div>
-    <!-- Pause Button -->
-    <button id="pauseButton"> || </button>
+
+
+
+
+    <div class="container">
+    <button id="playButton">Play</button>
+</div>
+</div>
+
+<!-- Game Over Screen containing: 1. Game Over; 2. Game result and points; 3.Replay button-->
+<div id="gameOverScreen">
+    <h1 id="gameOverMessage"> Game Over!</h1> <br>
+    <h2 id="resultMessage"></h2>  <!-- Placeholder for the result message -->
+    <div class="replayContainer">
+    <button id="replayButton"> Replay </button>
+</div>
 </div>
 
 
 
 
-    <div style="display: none;">
-        <img id="animations" src="assets/animations.gif" alt="">
-        <img id="ghosts" src="assets/ghost.png" alt="">
-    </div>
-   
-    <script src="ghost.js"></script>
-    <script src="pacman.js"></script>
-    <script src="game.js"></script>
-    
-    
+
+
+
+<div style="display: none;">
+    <img id="animations" src="assets/animations.gif" alt="">
+    <img id="ghosts" src="assets/ghost.png" alt="">
+</div>
+
+
+<script src="ghost.js"></script>
+<script src="pacman.js"></script>
+<script src="script.js"></script>
+
+
+ 
+
+
+
 </body>
 
 </html>
