@@ -30,10 +30,13 @@ class Ghost{
    moveProcess(){
     // if pacman eats the power-up target second location of random targets array
     if (ghostOverrideActive) {
-        this.target = randomTargetsForGhosts[1]; // Override target
+        this.target = randomTargetsForGhosts[this.randomTargetIndex]; // Override target
+        console.log(`Current Target: x = ${this.target.x}, y = ${this.target.y}`);
     } else if (this.isInRangeOfPacman()) { //if pacman is near target pacman
         this.target = pacman;
+        console.log('target pacman');
     } else { //else target a random location from the array
+        console.log('target anotherrrr');
         this.target = randomTargetsForGhosts[this.randomTargetIndex];
     }
 
@@ -111,13 +114,17 @@ class Ghost{
 
     }
 
-    changeDirectionIfPossible(){ 
+       changeDirectionIfPossible(){ 
         let tempDirection = this.direction;
 
         this.direction = this.calculateNewDirection(
             map,
-            parseInt(this.target.x / oneBlockSize),
-            parseInt(this.target.y / oneBlockSize)
+            oneBlockSize >= 20
+                ? parseInt(this.target.x / oneBlockSize)
+                : Math.round(this.target.x / oneBlockSize),
+            oneBlockSize >= 20
+                ? parseInt(this.target.y / oneBlockSize)
+                : Math.round(this.target.y / oneBlockSize)
         );
 
         if(typeof this.direction == "undefined"){
@@ -162,7 +169,7 @@ class Ghost{
             }
         }
     
-       // return DIRECTION_BOTTOM; // Default direction if no path is found
+       
     }
     
 
@@ -255,18 +262,35 @@ class Ghost{
 
  
     getMapX() {
-        return Math.floor(this.x / oneBlockSize);
+        if (oneBlockSize >= 20) {
+            return Math.floor(this.x / oneBlockSize);
+        } else {
+            return Math.round(this.x / oneBlockSize);
+        }
     }
     
     getMapY() {
-        return Math.floor(this.y / oneBlockSize);
+        if (oneBlockSize >= 20) {
+            return Math.floor(this.y / oneBlockSize);
+        } else {
+            return Math.round(this.y / oneBlockSize);
+        }
     }
     
     getMapXRightSide() {
-        return Math.floor((this.x + oneBlockSize - 0.01) / oneBlockSize);
+        if (oneBlockSize >= 20) {
+            return Math.floor((this.x + oneBlockSize - 0.01) / oneBlockSize);
+        } else {
+            return Math.round((this.x + oneBlockSize - 0.01) / oneBlockSize);
+        }
     }
     
     getMapYRightSide() {
-        return Math.floor((this.y + oneBlockSize - 0.01) / oneBlockSize);
+        if (oneBlockSize >= 20) {
+            return Math.floor((this.y + oneBlockSize - 0.01) / oneBlockSize);
+        } else {
+            return Math.round((this.y + oneBlockSize - 0.01) / oneBlockSize);
+        }
     }
+    
 } 
