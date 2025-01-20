@@ -1,22 +1,34 @@
-/* Prevent scrolling and center content */
- body {
-    margin: 0;
+body{
     background-color: rgb(0, 0, 0);
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    position: fixed;
+    overflow: hidden; /* Prevents scroll-bar */
+}
+#welcomeScreen, #gameOverScreen{
+    position: absolute;
     top: 0;
     left: 0;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    user-select: none; /* Prevent text selection */
+    width: 100%;
+    height: 100%;
+    display: flex;  /*center the welcome screen div*/
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    background-color: rgb(0, 0, 0);
+    
 }
 
-canvas {
+#gameOverScreen {
+    display: none; /* Hidden until the game ends*/
+}
+
+#canvasContainer {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-block;
+}
+
+#canvas {
     display: block;
     touch-action: none; /* Prevent touch zoom */
     -ms-touch-action: none;
@@ -24,126 +36,164 @@ canvas {
     user-select: none; /* Prevent canvas selection */
 }
 
-#pongWrapper {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    height: calc(100vw * 1.5);
-    max-height: 90vh;
+
+h1 {
+    color: rgb(222, 173, 173);
+    font-size: 1.6em;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 0%;
+    margin-top: 0%;
 }
 
-#welcomeScreen, #gameOverScreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(127, 107, 107); 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
+h2 {
+    color: rgb(222, 173, 173);
+    font-size: 1.4em;
+    text-align: center;
     font-family: 'Courier New', Courier, monospace;
 }
 
-#instructionsWrapper {
-    display: flex; /* Use flexbox to arrange items side by side */
-    justify-content: space-between; /* Space them evenly */
-    width: 100%; /* Take full width */
-    max-width: 600px; /* Limit to 600px to fit the canvas */
-    padding: 20px; /* Add padding for spacing */
-    box-sizing: border-box; /* Include padding in width calculation */
-}
-
-#rules, #moves {
-    color: white;
-    font-size: 1em; /* Adjust font size for readability */
-    width: 45%; /* Limit width of each section */
-}
-
-#rules h2, #moves h2 {
-    color: white;
-    font-size: 1.3em; /* Smaller headings for rules and moves */
-    text-align: center; /* Center the headings */
-}
-
-#rules ul, #moves ul {
+ul {
+    font-size: 1em;
+    color: palevioletred;
+    font-family: 'Courier New', Courier, monospace;
     list-style-type: none; /* Remove default list styles */
-    padding: 0; /* Remove padding from the list */
-    margin: 2px; /* Add margin for spacing */
+}
+#rules, #moves{
+    background-color: rgb(1, 1, 1);
     text-align: center; /* Center the list items */
 }
 
-#rules ul li, #moves ul li {
-font-size: 1em; /* Smaller list items for readability */
-}
-
-#welcomeScreen h1,  #gameOverScreen h1 {
-    color: white;
-    font-size: 2em;
-    text-align: center;
-    margin-top: 55px;
-    margin-bottom: 5px;
-}
-
-#gameOverScreen h2 {
-    color: white;
-    font-size: 1.5em;
-    text-align: center;
-    margin-top: 55px;
-    margin-bottom: 5px;
-}
-
-
-@media (max-width: 400px) {
-#welcomeScreen h1, #gameOverScreen h1 {
-font-size: 1.2em; /* Even smaller for very small screens */
-}
-#rules h2, #moves h2, #gameOverScreen h2 {
-font-size: 1.1em; /* Even smaller headings for rules and moves */
-}
-#rules ul li, #moves ul li {
-font-size: 0.9em; /* Smaller list items for better fit */
-}
-}
-
-#playButton,  #replayButton {
-    padding: 10px 10px;
-    font-size: 1em;
-    color: white;
-    background-color: #444;
+#playButton,  #replayButton{
+    padding: 3px 6px;
+    font-size: 1.2em;
+    color:  palevioletred;
+    background-color:rgb(173, 201, 239);
     border: none;
     cursor: pointer;
-    margin-top: 10px;
-    margin-bottom: 35px;
+    margin-top: 2px;
     border-radius: 5px; /* Rounded edges */
     font-family: 'Courier New', Courier, monospace;
 }
 
-#playButton:hover,  #replayButton:hover {
-    background-color: lightsteelblue;
+#playButton:hover,  #replayButton:hover{
+    background-color: rgb(151, 202, 243);
 }
 
-#gameOverScreen {
-    display: none; /* Hidden until the game ends */
-}
 
-#pauseButton {
+.container {
+    display: flex; /* Enables CSS flexbox */
+    justify-content: center; /* Centers play button horizontally */
+    align-items: center; /* Centers play button vertically */
+  }
+
+.replayContainer {
+    display: flex; /* Enables CSS flexbox */
+    justify-content: center; /* Centers play button horizontally */
+    align-items: center; /* Centers play button vertically */
+  }
+
+
+  #pauseButton {
     position: absolute;
-    padding: 0;
-    background-color: #ffffff;
-    color: rgb(0, 0, 0);
+    top: 5.5px; /* 10px from the top of the canvas */
+    right: 19px; /* 10px from the right of the canvas */
+    z-index: 10; /* Ensure it stays above the canvas */
+    background-color: rgb(255, 255, 255);
+    color: #000000;
     border: none;
+    padding: 2px 2px;
     cursor: pointer;
-    z-index: 2;
-    display: none; /* Hidden until the game starts */
-    border-radius: 5px; /* Rounded edges instead of circular */
-    /* Center text using flexbox */
+    font-size: 8px;
+    border-radius: 3px;
+
+    /* Center text inside the button */
     display: flex;
-    justify-content: center; /* Horizontally center */
     align-items: center; /* Vertically center */
-    /* Adjust line-height to help center the text */
-    line-height: 1em;
+    justify-content: center; /* Horizontally center */
+    text-align: center; /* Align text within button */
 }
+
+  
+  
+@media (max-width: 400px) { /* Smaller font for smaller screens */
+    h1 {
+        font-size: 1em; 
+    }
+    h2 {
+        font-size: 0.8em; 
+        }
+    ul {
+        font-size: 0.75em; 
+    }
+    #playButton{
+        font-size: 0.65em; 
+    }
+    #replayButton{
+        font-size: 0.65em; 
+    }
+    } 
+
+@media (max-width: 280px) {
+    h1 {
+        font-size: 0.8em !important; 
+    }
+    h2 {
+        font-size: 0.7em !important; 
+    }
+    ul {
+        font-size: 0.55em !important; 
+    }
+    #playButton {
+        font-size: 0.55em !important; 
+    }
+    #replayButton {
+        font-size: 0.55em !important; 
+    }
+    }
+
+
+@media (max-height: 580px) { /* Smaller font for smaller screens */
+    h1 {
+        font-size: 1em; 
+    }
+    h2 {
+        font-size: 0.8em; 
+    }
+    ul {
+        font-size: 0.75em; 
+    }
+    #playButton{
+        font-size: 0.65em; 
+    }
+    #replayButton{
+        font-size: 0.65em; 
+    }
+    }  
+
+
+@media (max-height: 400px) {
+    h1 {
+        font-size: 0.8em !important; 
+    }
+    h2 {
+        font-size: 0.7em !important; 
+    }
+    ul {
+        font-size: 0.55em !important; 
+    }
+    #playButton {
+        font-size: 0.55em !important; 
+    }
+    #replayButton {
+        font-size: 0.55em !important; 
+    }
+    }
+
+    
+
+
+ 
+
+
+            
