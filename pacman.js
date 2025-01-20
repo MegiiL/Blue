@@ -5,7 +5,7 @@ class Pacman{
         this.width = width; 
         this.height = height;
         this.speed = speed;
-        this.direction = DIRECTION_RIGHT; //current direction
+        this.direction = DIRECTION_RIGHT; //current direction moves right when user hits play
         this.nextDirection = this.direction; //next requested direction
         this.currentFrame = 1;
         this.frameCount = 7; //7 pacman frames to look like he is biting
@@ -139,16 +139,20 @@ class Pacman{
     return isGhostSpace;
     }
 
-    //check ghosts collision with pacman to reset the game
-    checkGhostCollision(ghosts){ 
-        for(let i = 0; i < ghosts.length; i++){
+    checkGhostCollision(ghosts) {
+        for (let i = 0; i < ghosts.length; i++) {
             let ghost = ghosts[i];
-            if(ghost.getMapX() == this.getMapX() && ghost.getMapY() == this.getMapY()){
+            if (
+                Math.abs(this.x - ghost.x) < oneBlockSize &&
+                Math.abs(this.y - ghost.y) < oneBlockSize
+            ) {
+                console.log('collided');
                 return true;
             }
         }
         return false;
-     }
+    }
+    
 
     changeDirectionIfPossible(){ 
         if(this.direction == this.nextDirection) return;
