@@ -1,32 +1,36 @@
-//GHOSTS DONT MOVE PROPERLY PROBLEM
-
-
 const canvas = document.getElementById("canvas");
+const canvasContainer = document.getElementById('canvasContainer');
 const canvasContext = canvas.getContext("2d");
+
 const pacmanFrames = document.getElementById("animations"); //7 pacman frames to look like he is biting
 const ghostFrames = document.getElementById("ghosts"); // 4 ghosts
 
 
 // Global variables to store canvas dimensions and block size
 let canvasWidth, canvasHeight, oneBlockSize;
-// Maximum canvas width constraint
+// Maximum canvas width and height constraint
 const maxCanvasWidth = 600;
 const maxCanvasHeight = 660; // 22 rows * 30px per block as a default
+
 //Variables to mofidy the wall setting and create blocks
 let wallSpaceWidth;
 let wallOffset;
-
 let wallColor = "#342DCA"; // blue wall
-let fps = 30; //number of frames to draw per second
 let wallInnerColor = "black"; //making blocks black in the middle
+
+let fps = 30; //number of frames to draw per second
+
 let foodColor = "#ffff4d"; // yellow food
+let foodCount = 0; //useful to calculate user score and winning condition
+let powerUpCount = 0; //userful to calculate user score and winning condition
 let score = 0;  //user score
+let lives = 3; // 3 tries for user within the game
+
 let ghosts = []; //ghosts array
 let randomTargetsForGhosts = []; // random targets for ghosts array
 let ghostCount = 4; // number of ghosts
-let lives = 3; // 3 tries for user within the game
-let foodCount = 0; //useful to calculate user score and winning condition
-let powerUpCount = 0; //userful to calculate user score and winning condition
+
+
 
 //Variables useful during the power-up 
 let ghostOverrideActive = false;
@@ -37,7 +41,7 @@ let paused = false;  // Flag to control the paused state
 // Pause button
 const pauseButton = document.getElementById('pauseButton');
 
-let gameResult;
+let gameResult; //user wins or loses
 
 
 // wall, food 
@@ -113,21 +117,23 @@ for(let i =0; i < map.length; i++){
 
 
 
-// Show the game over screen
+// Show the game over screen when user eats all food/power-ups or loses 3 lives
 function showGameOverScreen(gameResult) {
     //pause game when game finishes
     gameStarted = false;
-    // score holds the user's score
+    //game result and score will be written above replay button
     const resultMessage = document.getElementById('resultMessage');
 
+    // score holds the user's score, game result (either win or lose)
     if(gameResult == true){ //Win
-        resultMessage.innerHTML = `Winner!<br>Your score: ${score}`;  // show the total score
+        resultMessage.innerHTML = `Winner!<br>Your score: ${score}`;  // show the total score 
     }else { 
         resultMessage.innerHTML = `Try again!<br>Your score: ${score}`;   // Lose and show the total score
     }
     
     document.getElementById('gameOverScreen').style.display = 'flex';  // Show the game over screen
 }
+
 
 // Start the game loop when "Play" button is clicked
 document.getElementById('playButton').addEventListener('click', function() {
@@ -139,12 +145,15 @@ document.getElementById('playButton').addEventListener('click', function() {
    
 });
 
+
+
 // Replay the game when the "Replay" button is clicked
 document.getElementById('replayButton').addEventListener('click', function() {
-    document.getElementById('gameOverScreen').style.display = 'none';
+    document.getElementById('gameOverScreen').style.display = 'none'; //remove Game Over screen
     replayGame(); //reset all changed elements and recreate pacman/ghosts
    
 });
+
 
 // Pause Button Event Listener
 pauseButton.addEventListener('click', function() {
@@ -162,7 +171,7 @@ pauseButton.addEventListener('click', function() {
 
 //gameloop to draw and update the elements
 let gameLoop = () => {
-    if(gameStarted && !paused){
+    if(gameStarted && !paused){ //if play button is clicked and user has not paused the game draw elements and update movements
     draw();
     update();
     }
@@ -179,20 +188,27 @@ let update = () => {
     ghosts.forEach(ghost => ghost.moveProcess());
 
     // Handle collision logic
-    if (pacman.checkGhostCollision(ghosts)) { //if pacman and ghost collide
-        if (ghostOverrideActive) { // during the 8 seconds of eating the power-up
-            ghosts.forEach(ghost => {
-                if (pacman.getMapX() === ghost.getMapX() && pacman.getMapY() === ghost.getMapY()) {
-                    // Draw the ghost at its initial position as pacman eats the ghost
-                    ghost.x = ghost.initialX;
-                    ghost.y = ghost.initialY;
-                    score+=20; // increase user score by 20 points for ghost eaten
-                }
-            });
-        } else {
-            restartGame(); //lose one heart/life 
-        }
+if (pacman.checkGhostCollision(ghosts)) { // if pacman and ghost collide
+    console.log('first check in');
+    if (ghostOverrideActive) { // during the 8 seconds of eating the power-up
+        console.log('eat the ghost');
+        ghosts.forEach(ghost => {
+            // Check for proximity-based collision
+            if (Math.abs(pacman.x - ghost.x) < oneBlockSize &&
+                Math.abs(pacman.y - ghost.y) < oneBlockSize) {
+                console.log('redraw');
+                // Draw the ghost at its initial position as pacman eats the ghost
+                ghost.x = ghost.initialX;
+                ghost.y = ghost.initialY;
+                score += 20; // increase user score by 20 points for ghost eaten
+            }
+        });
+    } else {
+        console.log('lose a heart');
+        restartGame(); // lose one heart/life
     }
+}
+
       // Check for win condition
       if (foodCount == 0 && powerUpCount == 0) { //if pacman eats all foods and power-ups WIN
         gameResult = true; //win
@@ -203,6 +219,7 @@ let update = () => {
     }
 
 };
+
 
 //Reset map, score, lives since they change during the game
 //Set gameStarted to initial values to continue playing
@@ -260,7 +277,7 @@ let replayGame = () => {
 
 };
 
- 
+
 //under normal circumstances: when pacman and ghosts collide they are drawn to the initial positions
 // user loses one live/heart
 // if there are no more lives/hearts left GAME OVER
@@ -279,6 +296,7 @@ let restartGame = () => {
 };
 
 
+
 //in each tile equal to 2, draw food for pacman
 let drawFoods = () => {
     for(let i =0; i < map.length; i++){
@@ -294,6 +312,7 @@ let drawFoods = () => {
         }
     }
 }
+
 
 //in each tile equal to 4 draw a cherry power-up
 let drawPowerUp = () => {
@@ -326,6 +345,7 @@ let drawPowerUp = () => {
 
 
 
+
 // Draw heart shape representing lives
 function drawHeart(x, y, size, color) {
     canvasContext.fillStyle = color;
@@ -337,12 +357,11 @@ function drawHeart(x, y, size, color) {
     canvasContext.fill();
 }
 
+
 // draw hearts at the top right side of screen
 let drawLives = () => {
     const startX = 9.5 * oneBlockSize;
     const startY = oneBlockSize/2 - wallOffset;
-   // const startX = canvas.width - (3* oneBlockSize);
-   // const startY = oneBlockSize/2 - wallOffset;
     let heartSize;
 
     if (canvas.width <= 200) {
@@ -369,25 +388,28 @@ let drawLives = () => {
 //draw score at the top left side of the screen
 let drawScore = () => {
 
-canvasContext.fillStyle="white";
-if (canvas.width <= 200) {
-    canvasContext.font = "7px Courier"; }// Smaller font for screens up to 200px
-else if (canvas.width <= 400) {
-    canvasContext.font = "15px Courier"; // Smaller font for screens up to 400px
-} else if (canvas.width <= 600) {
-    canvasContext.font = "17px Courier"; // Medium font for screens between 401px and 600px
-}
-
-canvasContext.fillText("Score: " + score, oneBlockSize , oneBlockSize/2 + 4.5); // position of score at top left of the screen
-}
-
-//draw ghosts
-let drawGhosts = () => {
-    for(let i = 0; i < ghosts.length; i++){
-        ghosts[i].draw();
+    canvasContext.fillStyle="white";
+    if (canvas.width <= 200) {
+        canvasContext.font = "7px Courier"; }// Smaller font for screens up to 200px
+    else if (canvas.width <= 400) {
+        canvasContext.font = "15px Courier"; // Smaller font for screens up to 400px
+    } else if (canvas.width <= 600) {
+        canvasContext.font = "17px Courier"; // Medium font for screens between 401px and 600px
+    }
+    
+    canvasContext.fillText("Score: " + score, oneBlockSize , oneBlockSize/2 + 4.5); // position of score at top left of the screen
+    }
+    
+    //draw ghosts
+    let drawGhosts = () => {
+        for(let i = 0; i < ghosts.length; i++){
+            ghosts[i].draw();
+        }
+    
     }
 
-}
+
+
 
 //draw the game elements: wall, food, power-up, pacman, ghosts, score, lives
 let draw = () => {
@@ -463,7 +485,6 @@ let createNewPacman = () => {
   
      );
   };
-  
 
 
 // Function to calculate canvas size
@@ -487,6 +508,8 @@ let calculateCanvasSize = () => {
     canvasWidth = oneBlockSize * 20; 
     }
 
+    console.log(oneBlockSize);
+
     // Calculate wall-related properties after oneBlockSize is determined
     wallSpaceWidth = oneBlockSize / 1.5;
     wallOffset = (oneBlockSize - wallSpaceWidth) / 2;
@@ -495,45 +518,40 @@ let calculateCanvasSize = () => {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    //canvas at the center point of the screen
-    canvas.style.position = 'absolute';
-    canvas.style.left = '50%';
-    canvas.style.top = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
+   // Center the container on the screen
+    canvasContainer.style.width = `${canvasWidth}px`;
+    canvasContainer.style.height = `${canvasHeight}px`;
 
-
-    pauseButton.style.top = `${canvas.height - ( 21.75 * oneBlockSize)}px`; // Vertical position
-    pauseButton.style.left = `${canvas.width - (1.75 * oneBlockSize) }px`; // Horizontal position
-
-
-    
+    //pause button size depending on canvas size
     if (canvas.width <= 200) {
         pauseButton.style.width = "5px"; // Button width
         pauseButton.style.height = "5px"; // Button height
-        pauseButton.style.fontSize = "1px"; // Smaller font for screens up to 200px
+        pauseButton.style.fontSize = "4px"; // Smaller font for screens up to 200px
     } else if (canvas.width <= 400) {
         pauseButton.style.width = "10px"; // Button width
         pauseButton.style.height = "10px"; // Button height
-        pauseButton.style.fontSize = "5px"; // Smaller font for screens up to 400px
+        pauseButton.style.fontSize = "6px"; // Smaller font for screens up to 400px
     } else if (canvas.width <= 600) {
         pauseButton.style.width = "17px"; // Button width
         pauseButton.style.height = "17px"; // Button height
         pauseButton.style.fontSize = "10px"; // Medium font for screens between 401px and 600px
     }
-  
-    
-    // set random targets across the map if pacman is not in range, ghosts will move to these tiles
-    randomTargetsForGhosts = [
-        {x: 1 * oneBlockSize, y: 1 * oneBlockSize},
-        {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-        {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
-        {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-        //{x: 9 * oneBlockSize, y: 10 * oneBlockSize},
-        {x: 1 * oneBlockSize, y: 20 * oneBlockSize},
-        {x: 12 * oneBlockSize, y: 20 * oneBlockSize},
-        {x: 9 * oneBlockSize, y: 20 * oneBlockSize},
-        {x:  5 * oneBlockSize, y: 20 * oneBlockSize},
-    ];
+
+// set random targets across the map if pacman is not in range, ghosts will move to these tiles
+randomTargetsForGhosts = [
+    {x: 1 * oneBlockSize, y: 1 * oneBlockSize},
+    {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
+    {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
+    {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
+    {x: 9 * oneBlockSize, y: 10 * oneBlockSize},
+    {x: 1 * oneBlockSize, y: 20 * oneBlockSize},
+    {x: 12 * oneBlockSize, y: 20 * oneBlockSize},
+    {x: 9 * oneBlockSize, y: 20 * oneBlockSize},
+    {x:  5 * oneBlockSize, y: 20 * oneBlockSize},
+];
+
+
+
 };
 
 // Initialize the canvas size on load
@@ -544,100 +562,102 @@ calculateCanvasSize();
 // Add an event listener to recalculate canvas size when the window is resized
 window.addEventListener("resize", calculateCanvasSize);
 
+
+
 // ghosts properties
-  let createGhosts = () => {
-   ghosts = [];
-   for(let i = 0; i < ghostCount; i++){
-    let newGhost = new Ghost(
-        9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column 
-        10 * oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 11th row
-        oneBlockSize, // take one block size width
-        oneBlockSize, // take one block size height
-        (oneBlockSize/5) /2, // ghost speed
-        ghostImageLocations[i % 4].x, // x image location
-        ghostImageLocations[i % 4].y, // y image location
-        124, // ghost width in png
-        116, // ghost height in png
-        6 + i // range
-
-    );
-    ghosts.push(newGhost); //add to ghost array
-   }
-  }
-  createNewPacman();
-  createGhosts();
-  gameLoop(); 
-
-// Prevent text selection and context menu on long press
-canvas.addEventListener("touchstart", (event) => {
-    event.preventDefault(); // Prevent long press triggering selection
-});
-
-canvas.addEventListener("contextmenu", (event) => {
-    event.preventDefault(); // Prevent context menu on long press
-});
-
-// pacman movement on desktop using A/D W/S or arrow keys
-  window.addEventListener("keydown", (event) =>{
-    let k = event.keyCode;
-
-    setTimeout(() =>{
-        if(k == 37 || k == 65){ //left
-            pacman.nextDirection = DIRECTION_LEFT;
-
-        }else if(k == 38 || k == 87) { //up
-            pacman.nextDirection = DIRECTION_UP;
-
-        }else if(k == 39 || k == 68){ //right
-            pacman.nextDirection = DIRECTION_RIGHT;
-
-        }else if(k == 40 || k == 83){ //bottom
-            pacman.nextDirection = DIRECTION_BOTTOM;
-
-        }
-     
-    }, 1)
-  } )
-
-// Variables to store the start position of a swipe
-let touchStartX = 0;
-let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
-
-// Detect the start of a touch
-canvas.addEventListener("touchstart", (event) => {
-    const touch = event.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-});
-
-// Detect the end of a touch
-canvas.addEventListener("touchend", () => {
-    const deltaX = touchEndX - touchStartX;
-    const deltaY = touchEndY - touchStartY;
-
-    // Determine swipe direction based on the largest movement
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (deltaX > 0) {
-            pacman.nextDirection = DIRECTION_RIGHT; // Swipe right
-        } else {
-            pacman.nextDirection = DIRECTION_LEFT; // Swipe left
-        }
-    } else {
-        // Vertical swipe
-        if (deltaY > 0) {
-            pacman.nextDirection = DIRECTION_BOTTOM; // Swipe down
-        } else {
-            pacman.nextDirection = DIRECTION_UP; // Swipe up
-        }
+let createGhosts = () => {
+    ghosts = [];
+    for(let i = 0; i < ghostCount; i++){
+     let newGhost = new Ghost(
+         9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column 
+         10 * oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 11th row
+         oneBlockSize, // take one block size width
+         oneBlockSize, // take one block size height
+         (oneBlockSize/5) /2, // ghost speed
+         ghostImageLocations[i % 4].x, // x image location
+         ghostImageLocations[i % 4].y, // y image location
+         124, // ghost width in png
+         116, // ghost height in png
+         6 + i // range
+ 
+     );
+     ghosts.push(newGhost); //add to ghost array
     }
-});
-
-// Detect the movement of a touch
-canvas.addEventListener("touchmove", (event) => {
-    const touch = event.touches[0];
-    touchEndX = touch.clientX;
-    touchEndY = touch.clientY;
-});
+   }
+   createNewPacman();
+   createGhosts();
+   gameLoop(); 
+ 
+ // Prevent text selection and context menu on long press
+ canvas.addEventListener("touchstart", (event) => {
+     event.preventDefault(); // Prevent long press triggering selection
+ });
+ 
+ canvas.addEventListener("contextmenu", (event) => {
+     event.preventDefault(); // Prevent context menu on long press
+ });
+ 
+ // pacman movement on desktop using A/D W/S or arrow keys
+   window.addEventListener("keydown", (event) =>{
+     let k = event.keyCode;
+ 
+     setTimeout(() =>{
+         if(k == 37 || k == 65){ //left
+             pacman.nextDirection = DIRECTION_LEFT;
+ 
+         }else if(k == 38 || k == 87) { //up
+             pacman.nextDirection = DIRECTION_UP;
+ 
+         }else if(k == 39 || k == 68){ //right
+             pacman.nextDirection = DIRECTION_RIGHT;
+ 
+         }else if(k == 40 || k == 83){ //bottom
+             pacman.nextDirection = DIRECTION_BOTTOM;
+ 
+         }
+      
+     }, 1)
+   } )
+ 
+ // Variables to store the start position of a swipe
+ let touchStartX = 0;
+ let touchStartY = 0;
+ let touchEndX = 0;
+ let touchEndY = 0;
+ 
+ // Detect the start of a touch
+ canvas.addEventListener("touchstart", (event) => {
+     const touch = event.touches[0];
+     touchStartX = touch.clientX;
+     touchStartY = touch.clientY;
+ });
+ 
+ // Detect the end of a touch
+ canvas.addEventListener("touchend", () => {
+     const deltaX = touchEndX - touchStartX;
+     const deltaY = touchEndY - touchStartY;
+ 
+     // Determine swipe direction based on the largest movement
+     if (Math.abs(deltaX) > Math.abs(deltaY)) {
+         // Horizontal swipe
+         if (deltaX > 0) {
+             pacman.nextDirection = DIRECTION_RIGHT; // Swipe right
+         } else {
+             pacman.nextDirection = DIRECTION_LEFT; // Swipe left
+         }
+     } else {
+         // Vertical swipe
+         if (deltaY > 0) {
+             pacman.nextDirection = DIRECTION_BOTTOM; // Swipe down
+         } else {
+             pacman.nextDirection = DIRECTION_UP; // Swipe up
+         }
+     }
+ });
+ 
+ // Detect the movement of a touch
+ canvas.addEventListener("touchmove", (event) => {
+     const touch = event.touches[0];
+     touchEndX = touch.clientX;
+     touchEndY = touch.clientY;
+ });
