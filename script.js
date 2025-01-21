@@ -543,7 +543,7 @@ randomTargetsForGhosts = [
     {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
     {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
     {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-    {x: 9 * oneBlockSize, y: 10 * oneBlockSize},
+    // {x: 9 * oneBlockSize, y: 10 * oneBlockSize},
     {x: 1 * oneBlockSize, y: 20 * oneBlockSize},
     {x: 12 * oneBlockSize, y: 20 * oneBlockSize},
     {x: 9 * oneBlockSize, y: 20 * oneBlockSize},
