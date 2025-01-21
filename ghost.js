@@ -21,32 +21,59 @@ class Ghost{
         }, 10000)
     }
 
+
     //change targets to keep moving if pacman is not near
    changeRandomDirection(){
     this.randomTargetIndex += 1;
-    this.randomTargetIndex = this.randomTargetIndex % 8;
+    this.randomTargetIndex = this.randomTargetIndex % 7;
    }
 
-   moveProcess(){
-    // if pacman eats the power-up target second location of random targets array
+   moveProcess() {
+    // Determine the target
     if (ghostOverrideActive) {
-        this.target = randomTargetsForGhosts[this.randomTargetIndex]; // Override target
-        console.log(`Current Target: x = ${this.target.x}, y = ${this.target.y}`);
-    } else if (this.isInRangeOfPacman()) { //if pacman is near target pacman
+        this.target = randomTargetsForGhosts[this.randomTargetIndex];
+    } else if (this.isInRangeOfPacman()) {
         this.target = pacman;
-        console.log('target pacman');
-    } else { //else target a random location from the array
-        console.log('target anotherrrr');
+    } else {
         this.target = randomTargetsForGhosts[this.randomTargetIndex];
     }
 
+    // Attempt to change direction if possible
     this.changeDirectionIfPossible();
+
+    // Move forward
     this.moveForwards();
+
+    // Check for collision and handle it
     if (this.checkCollision()) {
         this.moveBackwards();
+        this.alignToGrid(); // Align to grid only after a collision to avoid stuck states
+        this.changeRandomDirection();
+        this.changeDirectionIfPossible();
         return;
     }
+
 }
+
+
+alignToGrid() {
+    const xCenter = this.getMapX() * oneBlockSize + oneBlockSize / 2;
+    const yCenter = this.getMapY() * oneBlockSize + oneBlockSize / 2;
+
+    const xOffset = this.x - xCenter;
+    const yOffset = this.y - yCenter;
+
+    // Align only if close enough to the center of the tile
+    if (Math.abs(xOffset) < this.speed) {
+        this.x = xCenter;
+    }
+
+    if (Math.abs(yOffset) < this.speed) {
+        this.y = yCenter;
+    }
+}
+
+
 
 
    //moving backwards
@@ -128,6 +155,7 @@ class Ghost{
         );
 
         if(typeof this.direction == "undefined"){
+            console.log('UNDEFINED');
             this.direction = tempDirection;
             return;
         }
@@ -260,7 +288,6 @@ class Ghost{
     
 
 
- 
     getMapX() {
         if (oneBlockSize >= 20) {
             return Math.floor(this.x / oneBlockSize);
@@ -292,5 +319,6 @@ class Ghost{
             return Math.round((this.y + oneBlockSize - 0.01) / oneBlockSize);
         }
     }
+    
     
 } 
