@@ -1,244 +1,96 @@
-class Ghost{
-    constructor(x, y, width, height, speed, imageX, imageY, imageWidth, imageHeight, range){
-        this.x = x; // x position
-        this.y = y; // y position middle of map
-        this.width = width; //ghost width in canvas
-        this.height = height; //ghost height in canvas
+class Ghost {
+    constructor(x, y, width, height, speed, imageX, imageY, imageWidth, imageHeight, range, id) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         this.speed = speed;
-        this.direction = DIRECTION_RIGHT;
-        this.imageX = imageX; // ghost x position in PNG
-        this.imageY = imageY; //ghost y position in PNG
-        this.imageWidth = imageWidth; //ghost width in PNG
-        this.imageHeight = imageHeight; //ghost height in PNG
+        this.imageX = imageX;
+        this.imageY = imageY;
+        this.imageWidth = imageWidth;
+        this.imageHeight = imageHeight;
         this.range = range;
-        this.initialX = x; // Store initial position
-        this.initialY = y; 
-        this.pulsationStartTime = null; // Initialize to track pulsation timing
-        this.randomTargetIndex = parseInt(Math.random() * randomTargetsForGhosts.length); //index for one of the ghosts random target array to keep moving
-        
-        setInterval(() =>{
-            this.changeRandomDirection()
-        }, 10000)
+        this.initialX = x;
+        this.initialY = y;
+        this.direction = 'right'; // Default direction
+        this.targetTile = this.getCurrentPosition();
+        this.lastDirection = null; // Store last direction to avoid loops
     }
 
-
-    //change targets to keep moving if pacman is not near
-   changeRandomDirection(){
-    this.randomTargetIndex += 1;
-    this.randomTargetIndex = this.randomTargetIndex % 7;
-   }
-
-   moveProcess() {
-    // Determine the target
-    if (ghostOverrideActive) {
-        this.target = randomTargetsForGhosts[this.randomTargetIndex];
-    } else if (this.isInRangeOfPacman()) {
-        this.target = pacman;
-    } else {
-        this.target = randomTargetsForGhosts[this.randomTargetIndex];
+    getCurrentPosition() {
+        return {
+            row: Math.floor(this.y / oneBlockSize),
+            col: Math.floor(this.x / oneBlockSize),
+        };
     }
 
-    // Attempt to change direction if possible
-    this.changeDirectionIfPossible();
+    getPossibleMoves() {
+        let { row, col } = this.getCurrentPosition();
+        let possibleMoves = [];
 
-    // Move forward
-    this.moveForwards();
+        if (col > 0 && map[row][col - 1] !== 1) possibleMoves.push("left");
+        if (col < map[0].length - 1 && map[row][col + 1] !== 1) possibleMoves.push("right");
+        if (row > 0 && map[row - 1][col] !== 1) possibleMoves.push("up");
+        if (row < map.length - 1 && map[row + 1][col] !== 1) possibleMoves.push("down");
 
-    // Check for collision and handle it
-    if (this.checkCollision()) {
-        this.moveBackwards();
-        this.alignToGrid(); // Align to grid only after a collision to avoid stuck states
-        this.changeRandomDirection();
-        this.changeDirectionIfPossible();
-        return;
+        return possibleMoves;
     }
 
-}
+    chooseDirection() {
+        let possibleMoves = this.getPossibleMoves();
 
+        if (possibleMoves.length > 1) {
+            // Avoid backtracking (unless no other choice)
+            const oppositeDirection = {
+                left: "right",
+                right: "left",
+                up: "down",
+                down: "up"
+            };
 
-alignToGrid() {
-    const xCenter = this.getMapX() * oneBlockSize + oneBlockSize / 2;
-    const yCenter = this.getMapY() * oneBlockSize + oneBlockSize / 2;
+            possibleMoves = possibleMoves.filter(dir => dir !== oppositeDirection[this.lastDirection]);
 
-    const xOffset = this.x - xCenter;
-    const yOffset = this.y - yCenter;
-
-    // Align only if close enough to the center of the tile
-    if (Math.abs(xOffset) < this.speed) {
-        this.x = xCenter;
-    }
-
-    if (Math.abs(yOffset) < this.speed) {
-        this.y = yCenter;
-    }
-}
-
-
-
-
-   //moving backwards
-   moveBackwards(){
-        switch(this.direction){
-            case DIRECTION_RIGHT:
-                this.x -= this.speed;
-                break;
-            case DIRECTION_UP:
-                this.y += this.speed;
-                break;
-            case DIRECTION_LEFT:
-                this.x += this.speed;
-                break;
-            case DIRECTION_BOTTOM:
-                this.y -= this.speed;
-                break;
-
-        }
-      }
-
-      //moving forwards
-    moveForwards(){ 
-        switch(this.direction){
-            case DIRECTION_RIGHT:
-                this.x += this.speed;
-                break;
-            case DIRECTION_UP:
-                this.y -= this.speed;
-                break;
-            case DIRECTION_LEFT:
-                this.x -= this.speed;
-                break;
-            case DIRECTION_BOTTOM:
-                this.y += this.speed;
-                break;
-
-        }
-     }
-
-    //check wall collision so it doesn't move across the wall
-    checkCollision(){ 
-        let tolerance = 0.01; // Small margin to prevent getting stuck
-        let isCollided = false;
-       
-        if(map[Math.floor((this.y + tolerance) / oneBlockSize)][Math.floor((this.x + tolerance) / oneBlockSize)] === 1 ||
-        map[Math.floor((this.y + tolerance) / oneBlockSize)][Math.floor((this.x + oneBlockSize - tolerance) / oneBlockSize)] === 1 ||
-        map[Math.floor((this.y + oneBlockSize - tolerance) / oneBlockSize)][Math.floor((this.x + tolerance) / oneBlockSize)] === 1 ||
-        map[Math.floor((this.y + oneBlockSize - tolerance) / oneBlockSize)][Math.floor((this.x + oneBlockSize - tolerance) / oneBlockSize)] === 1
-    ){
-        isCollided = true;
-    }
-    return isCollided;
-    }
-
-   
-   //to calculate if pacman is near, make pacman target
-    isInRangeOfPacman(){
-        let xDistance = Math.abs(pacman.getMapX() - this.getMapX());
-        let yDistance = Math.abs(pacman.getMapY() - this.getMapY());
-        if(Math.sqrt(xDistance * xDistance + yDistance * yDistance) <= this.range){
-          return true;  
-        }
-        return false;
-
-    }
-
-       changeDirectionIfPossible(){ 
-        let tempDirection = this.direction;
-
-        this.direction = this.calculateNewDirection(
-            map,
-            oneBlockSize >= 20
-                ? parseInt(this.target.x / oneBlockSize)
-                : Math.round(this.target.x / oneBlockSize),
-            oneBlockSize >= 20
-                ? parseInt(this.target.y / oneBlockSize)
-                : Math.round(this.target.y / oneBlockSize)
-        );
-
-        if(typeof this.direction == "undefined"){
-            console.log('UNDEFINED');
-            this.direction = tempDirection;
-            return;
-        }
-        
-        this.moveForwards();
-        if(this.checkCollision()){
-            this.moveBackwards();
-            this.direction = tempDirection;
-        }else{
-            this.moveBackwards();
-        }
-
-     }
-
-     calculateNewDirection(map, destX, destY){
-        let mp = [];
-        for (let i = 0; i < map.length; i++) {
-            mp[i] = map[i].slice(); // Clone the map
-        }
-    
-        let queue = [{
-            x: this.getMapX(),
-            y: this.getMapY(),
-            moves: [],
-        }];
-        
-    
-        while(queue.length > 0){
-            let poped = queue.shift();
-            if(poped.x == destX && poped.y == destY ){
-                return poped.moves[0];
-            }else{
-                mp[poped.y][poped.x] = 1;
-                let neigbourList = this.addNeigbours(poped, mp);
-                for(let i = 0; i < neigbourList.length; i++){
-                    queue.push(neigbourList[i]);
-                }
-    
+            // Add randomness: 20% chance to ignore backtracking rule for more natural movement
+            if (Math.random() < 0.2 && this.lastDirection && possibleMoves.length > 1) {
+                possibleMoves.push(oppositeDirection[this.lastDirection]);
             }
         }
-    
-       
-    }
-    
 
+        // Choose a new direction from the refined list
+        if (possibleMoves.length > 0) {
+            this.direction = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+        }
 
-    addNeigbours(poped, mp){
-        let queue = [];
-        let numOfRows = mp.length;
-        let numOfColumns = mp[0].length;
-    
-        // Check left direction
-        if(poped.x - 1 >= 0 && mp[poped.y][poped.x - 1] != 1){ // left
-            let tempMoves = poped.moves.slice();
-            tempMoves.push(DIRECTION_LEFT);
-            queue.push({x: poped.x - 1, y: poped.y, moves: tempMoves});
-        }
-    
-        // Check right direction
-        if(poped.x + 1 < numOfColumns && mp[poped.y][poped.x + 1] != 1){ // right
-            let tempMoves = poped.moves.slice();
-            tempMoves.push(DIRECTION_RIGHT);
-            queue.push({x: poped.x + 1, y: poped.y, moves: tempMoves});
-        }
-    
-        // Check up direction
-        if(poped.y - 1 >= 0 && mp[poped.y - 1][poped.x] != 1){ // up
-            let tempMoves = poped.moves.slice();
-            tempMoves.push(DIRECTION_UP);
-            queue.push({x: poped.x, y: poped.y - 1, moves: tempMoves});
-        }
-    
-        // Check down direction
-        if(poped.y + 1 < numOfRows && mp[poped.y + 1][poped.x] != 1){ // down
-            let tempMoves = poped.moves.slice();
-            tempMoves.push(DIRECTION_BOTTOM);
-            queue.push({x: poped.x, y: poped.y + 1, moves: tempMoves});
-        }
-    
-        return queue;
+        this.lastDirection = this.direction; // Update memory of last move
+
+        // Set target tile for movement
+        let { row, col } = this.getCurrentPosition();
+        if (this.direction === "left") col--;
+        else if (this.direction === "right") col++;
+        else if (this.direction === "up") row--;
+        else if (this.direction === "down") row++;
+
+        this.targetTile = { row, col };
     }
-    
-   
+
+    moveProcess() {
+        let targetX = this.targetTile.col * oneBlockSize;
+        let targetY = this.targetTile.row * oneBlockSize;
+
+        // Move gradually
+        if (this.x < targetX) this.x += this.speed;
+        if (this.x > targetX) this.x -= this.speed;
+        if (this.y < targetY) this.y += this.speed;
+        if (this.y > targetY) this.y -= this.speed;
+
+        // Check if the ghost reached its target tile
+        if (Math.abs(this.x - targetX) < this.speed && Math.abs(this.y - targetY) < this.speed) {
+            this.x = targetX;
+            this.y = targetY;
+            this.chooseDirection(); // Choose a new direction
+        }
+    }
+
     draw() {
         canvasContext.save();
     
@@ -285,40 +137,4 @@ alignToGrid() {
     
         canvasContext.restore();
     }
-    
-
-
-    getMapX() {
-        if (oneBlockSize >= 20) {
-            return Math.floor(this.x / oneBlockSize);
-        } else {
-            return Math.round(this.x / oneBlockSize);
-        }
-    }
-    
-    getMapY() {
-        if (oneBlockSize >= 20) {
-            return Math.floor(this.y / oneBlockSize);
-        } else {
-            return Math.round(this.y / oneBlockSize);
-        }
-    }
-    
-    getMapXRightSide() {
-        if (oneBlockSize >= 20) {
-            return Math.floor((this.x + oneBlockSize - 0.01) / oneBlockSize);
-        } else {
-            return Math.round((this.x + oneBlockSize - 0.01) / oneBlockSize);
-        }
-    }
-    
-    getMapYRightSide() {
-        if (oneBlockSize >= 20) {
-            return Math.floor((this.y + oneBlockSize - 0.01) / oneBlockSize);
-        } else {
-            return Math.round((this.y + oneBlockSize - 0.01) / oneBlockSize);
-        }
-    }
-    
-    
-} 
+}
