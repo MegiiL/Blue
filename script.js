@@ -168,7 +168,6 @@ pauseButton.addEventListener('click', function() {
 });
 
 
-
 //gameloop to draw and update the elements
 let gameLoop = () => {
     if(gameStarted && !paused){ //if play button is clicked and user has not paused the game draw elements and update movements
@@ -200,7 +199,10 @@ if (pacman.checkGhostCollision(ghosts)) { // if pacman and ghost collide
                 // Draw the ghost at its initial position as pacman eats the ghost
                 ghost.x = ghost.initialX;
                 ghost.y = ghost.initialY;
-                score += 20; // increase user score by 20 points for ghost eaten
+                ghost.targetTile = ghost.getCurrentPosition(); // Reset target to the new position
+                ghost.lastDirection = null; // Avoid going back to previous location
+                ghost.chooseDirection(); // Pick a new direction to move
+                score += 20;
             }
         });
     } else {
@@ -539,15 +541,10 @@ let calculateCanvasSize = () => {
 
 // set random targets across the map if pacman is not in range, ghosts will move to these tiles
 randomTargetsForGhosts = [
-    {x: 1 * oneBlockSize, y: 1 * oneBlockSize},
-    {x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-    {x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
-    {x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize},
-    // {x: 9 * oneBlockSize, y: 10 * oneBlockSize},
-    {x: 1 * oneBlockSize, y: 20 * oneBlockSize},
-    {x: 12 * oneBlockSize, y: 20 * oneBlockSize},
-    {x: 9 * oneBlockSize, y: 20 * oneBlockSize},
-    {x:  5 * oneBlockSize, y: 20 * oneBlockSize},
+    { x: 1 * oneBlockSize, y: 1 * oneBlockSize },
+    { x: 1 * oneBlockSize, y: (map.length - 2) * oneBlockSize },
+    { x: (map[0].length - 2) * oneBlockSize, y: oneBlockSize },
+    { x: (map[0].length - 2) * oneBlockSize, y: (map.length - 2) * oneBlockSize }
 ];
 
 
@@ -569,16 +566,17 @@ let createGhosts = () => {
     ghosts = [];
     for(let i = 0; i < ghostCount; i++){
      let newGhost = new Ghost(
-         9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column 
-         10 * oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 11th row
-         oneBlockSize, // take one block size width
+        9 *  oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 10th column 
+        10 * oneBlockSize + (i % 2 == 0 ? 0 : 1) * oneBlockSize,  // draw it at 11th row
+         oneBlockSize , // take one block size width
          oneBlockSize, // take one block size height
          (oneBlockSize/5) /2, // ghost speed
          ghostImageLocations[i % 4].x, // x image location
          ghostImageLocations[i % 4].y, // y image location
          124, // ghost width in png
          116, // ghost height in png
-         6 + i // range
+         6 + i, // range
+         i
  
      );
      ghosts.push(newGhost); //add to ghost array
